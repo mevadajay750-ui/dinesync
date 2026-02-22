@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/Button";
@@ -19,8 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/Card";
 import { ROUTES } from "@/lib/constants";
-import { getInviteById, isInviteValid } from "@/services/invite.service";
-import { acceptInvite } from "@/services/invite.service";
+import { getInviteById, isInviteValid, acceptInvite } from "@/services/invite.service";
 import { createUser } from "@/services/user.service";
 import { getCurrentUser } from "@/lib/firebase/auth";
 import type { Invite } from "@/types/invite";
@@ -49,6 +49,7 @@ function RegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteId = searchParams.get("inviteId");
+  const prefersReducedMotion = useReducedMotion();
   const { signUp, loading, firebaseUser, user, error, setError, refreshUser } =
     useAuth();
   const toast = useToast();
@@ -173,8 +174,8 @@ function RegisterPageContent() {
 
   if (inviteId && inviteLoading) {
     return (
-      <Card>
-        <CardContent className="flex min-h-[200px] items-center justify-center p-6">
+      <Card className="rounded-2xl border border-border bg-card shadow-lg dark:bg-surface">
+        <CardContent className="flex min-h-[200px] items-center justify-center p-8">
           <p className="text-sm text-muted-foreground">Checking invite…</p>
         </CardContent>
       </Card>
@@ -183,15 +184,17 @@ function RegisterPageContent() {
 
   if (inviteId && inviteError && !invite) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Invalid invite</CardTitle>
-          <CardDescription>{inviteError}</CardDescription>
+      <Card className="rounded-2xl border border-border bg-card shadow-lg dark:bg-surface">
+        <CardHeader className="p-8 pb-0">
+          <CardTitle className="text-2xl font-semibold">Invalid invite</CardTitle>
+          <CardDescription className="text-sm text-muted-foreground">
+            {inviteError}
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-8">
           <Link
             href={ROUTES.REGISTER}
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-brand-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 rounded"
           >
             Register without an invite
           </Link>
@@ -201,72 +204,93 @@ function RegisterPageContent() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          {invite ? "Join your team" : "Create account"}
-        </CardTitle>
-        <CardDescription>
-          {invite
-            ? `You’re invited to join as ${ROLE_LABELS[invite.role]}. Create your account below.`
-            : "Register your organization on DineSync"}
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-4">
-          <Input
-            label="Full name"
-            autoComplete="name"
-            error={errors.name?.message}
-            {...register("name")}
-          />
-          <Input
-            label="Email"
-            type="email"
-            autoComplete="email"
-            error={errors.email?.message}
-            readOnly={!!invite}
-            {...register("email")}
-          />
-          <Input
-            label="Password"
-            type="password"
-            autoComplete="new-password"
-            error={errors.password?.message}
-            {...register("password")}
-          />
-          <Input
-            label="Confirm password"
-            type="password"
-            autoComplete="new-password"
-            error={errors.confirmPassword?.message}
-            {...register("confirmPassword")}
-          />
-          {error && (
-            <p className="mt-1 text-sm text-danger" role="alert">
-              {error}
-            </p>
-          )}
-          <Button
-            type="submit"
-            fullWidth
-            loading={isSubmitting || loading}
-            disabled={isSubmitting || loading}
-          >
-            {invite ? "Create account & join" : "Create account"}
-          </Button>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <Link
-            href={ROUTES.LOGIN}
-            className="text-sm text-primary hover:underline"
-            onClick={() => setError(null)}
-          >
-            Already have an account? Sign in
-          </Link>
-        </CardFooter>
-      </form>
-    </Card>
+    <motion.div
+      initial={prefersReducedMotion ? undefined : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <Card className="rounded-2xl border border-border bg-card p-8 shadow-lg dark:bg-surface">
+        <CardHeader className="space-y-1.5 p-0 pb-6">
+          <CardTitle className="text-2xl font-semibold text-foreground">
+            {invite ? "Join your team" : "Create account"}
+          </CardTitle>
+          <CardDescription className="text-sm text-muted-foreground">
+            {invite
+              ? `You're invited to join as ${ROLE_LABELS[invite.role]}. Create your account below.`
+              : "Register your organization on DineSync"}
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <CardContent className="space-y-6 p-0">
+            <Input
+              label="Full name"
+              autoComplete="name"
+              error={errors.name?.message}
+              className="h-11 rounded-lg focus-visible:ring-brand-accent"
+              {...register("name")}
+            />
+            <Input
+              label="Email"
+              type="email"
+              autoComplete="email"
+              error={errors.email?.message}
+              readOnly={!!invite}
+              className="h-11 rounded-lg focus-visible:ring-brand-accent"
+              {...register("email")}
+            />
+            <Input
+              label="Password"
+              type="password"
+              autoComplete="new-password"
+              error={errors.password?.message}
+              className="h-11 rounded-lg focus-visible:ring-brand-accent"
+              {...register("password")}
+            />
+            <Input
+              label="Confirm password"
+              type="password"
+              autoComplete="new-password"
+              error={errors.confirmPassword?.message}
+              className="h-11 rounded-lg focus-visible:ring-brand-accent"
+              {...register("confirmPassword")}
+            />
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-sm text-danger"
+                  role="alert"
+                >
+                  {error}
+                </motion.p>
+              )}
+            </AnimatePresence>
+            <Button
+              type="submit"
+              fullWidth
+              size="lg"
+              loading={isSubmitting || loading}
+              disabled={isSubmitting || loading}
+              className="h-11 rounded-lg bg-brand-accent hover:opacity-90"
+            >
+              {invite ? "Create account & join" : "Create account"}
+            </Button>
+          </CardContent>
+          <CardFooter className="mt-6 justify-center p-0">
+            <Link
+              href={ROUTES.LOGIN}
+              className="text-sm text-brand-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 rounded"
+              onClick={() => setError(null)}
+            >
+              Already have an account? Sign in
+            </Link>
+          </CardFooter>
+        </form>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -274,8 +298,8 @@ export default function RegisterPage() {
   return (
     <Suspense
       fallback={
-        <Card>
-          <CardContent className="flex min-h-[200px] items-center justify-center p-6">
+        <Card className="rounded-2xl border border-border bg-card shadow-lg dark:bg-surface">
+          <CardContent className="flex min-h-[200px] items-center justify-center p-8">
             <p className="text-sm text-muted-foreground">Loading…</p>
           </CardContent>
         </Card>
