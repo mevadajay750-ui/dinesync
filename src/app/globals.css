@@ -1,44 +1,54 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #171717;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --primary: #0f766e;
-  --primary-foreground: #f0fdfa;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  --destructive: #dc2626;
-  --destructive-foreground: #fef2f2;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #0f766e;
+  --background: #F9FAFB;
+  --foreground: #101828;
+  --card: #FFFFFF;
+  --card-foreground: #101828;
+  --primary: #101828;
+  --primary-foreground: #FFFFFF;
+  --secondary: #01A9B4;
+  --secondary-foreground: #FFFFFF;
+  --muted: #98A2B3;
+  --muted-foreground: #667085;
+  --accent: #F2F4F7;
+  --accent-foreground: #101828;
+  --destructive: #F04438;
+  --destructive-foreground: #FFFFFF;
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #01A9B4;
+  --surface: #FFFFFF;
+  --success: #12B76A;
+  --warning: #F79009;
+  --danger: #F04438;
+  --info: #2E90FA;
 }
 
 .dark,
 [data-theme="dark"] {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --card: #171717;
-  --card-foreground: #ededed;
-  --primary: #14b8a6;
-  --primary-foreground: #042f2e;
-  --secondary: #262626;
-  --secondary-foreground: #fafafa;
-  --muted: #262626;
-  --muted-foreground: #a3a3a3;
-  --accent: #262626;
-  --accent-foreground: #fafafa;
-  --destructive: #ef4444;
-  --destructive-foreground: #fef2f2;
-  --border: #262626;
-  --input: #262626;
-  --ring: #14b8a6;
+  --background: #0B1120;
+  --foreground: #F9FAFB;
+  --card: #111827;
+  --card-foreground: #F9FAFB;
+  --primary: #101828;
+  --primary-foreground: #FFFFFF;
+  --secondary: #01A9B4;
+  --secondary-foreground: #FFFFFF;
+  --muted: #4B5563;
+  --muted-foreground: #9CA3AF;
+  --accent: #1F2937;
+  --accent-foreground: #F9FAFB;
+  --destructive: #F04438;
+  --destructive-foreground: #FFFFFF;
+  --border: #374151;
+  --input: #374151;
+  --ring: #01A9B4;
+  --surface: #111827;
+  --success: #12B76A;
+  --warning: #F79009;
+  --danger: #F04438;
+  --info: #2E90FA;
 }
 
 @theme inline {
@@ -59,8 +69,15 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-surface: var(--surface);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --radius-xl: 0.75rem;
+  --radius-lg: 0.5rem;
 }
 
 body {

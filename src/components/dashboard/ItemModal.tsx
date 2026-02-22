@@ -182,7 +182,7 @@ export function ItemModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="rounded-xl p-1 text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             aria-label="Close"
           >
             <span className="text-xl leading-none">&times;</span>
@@ -204,10 +204,10 @@ export function ItemModal({
                 {...register("description")}
                 placeholder="Short description"
                 rows={3}
-                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
+                className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 disabled:opacity-50 transition-all duration-200"
               />
               {errors.description?.message && (
-                <p className="mt-1.5 text-sm text-destructive">
+                <p className="mt-1 text-sm text-danger">
                   {errors.description.message}
                 </p>
               )}
@@ -227,7 +227,7 @@ export function ItemModal({
               </label>
               <select
                 {...register("categoryId")}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 transition-all duration-200"
               >
                 <option value="">Select category</option>
                 {categories.map((c) => (
@@ -237,7 +237,7 @@ export function ItemModal({
                 ))}
               </select>
               {errors.categoryId?.message && (
-                <p className="mt-1.5 text-sm text-destructive">
+                <p className="mt-1 text-sm text-danger">
                   {errors.categoryId.message}
                 </p>
               )}
@@ -252,7 +252,7 @@ export function ItemModal({
                   aria-checked={isVeg}
                   onClick={() => setValue("isVeg", !isVeg)}
                   className={cn(
-                    "relative inline-flex h-6 w-11 shrink-0 rounded-full border border-input transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                    "relative inline-flex h-6 w-11 shrink-0 rounded-full border border-input transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2",
                     isVeg ? "bg-primary" : "bg-muted"
                   )}
                 >
@@ -275,7 +275,7 @@ export function ItemModal({
                   aria-checked={isAvailable}
                   onClick={() => setValue("isAvailable", !isAvailable)}
                   className={cn(
-                    "relative inline-flex h-6 w-11 shrink-0 rounded-full border border-input transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                    "relative inline-flex h-6 w-11 shrink-0 rounded-full border border-input transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2",
                     isAvailable ? "bg-primary" : "bg-muted"
                   )}
                 >
@@ -318,7 +318,7 @@ export function ItemModal({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex h-28 w-full max-w-[200px] items-center justify-center rounded-md border border-dashed border-input bg-muted/30 text-muted-foreground transition-colors hover:bg-muted/50"
+                    className="flex h-28 w-full max-w-[200px] items-center justify-center rounded-xl border border-dashed border-input bg-muted/30 text-muted-foreground transition-all duration-200 hover:bg-muted/50"
                   >
                     <input
                       ref={fileInputRef}
@@ -334,7 +334,7 @@ export function ItemModal({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm text-muted-foreground hover:bg-accent"
+                    className="flex h-10 items-center gap-2 rounded-lg border border-input bg-background px-3 text-sm text-muted-foreground transition-all duration-200 hover:bg-accent"
                   >
                     <input
                       ref={fileInputRef}

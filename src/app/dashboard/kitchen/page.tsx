@@ -10,23 +10,12 @@ import { useOrdersRealtime, useNewPendingOrderAlert } from "@/hooks/useOrdersRea
 import { updateOrderStatus } from "@/services/order.service";
 import type { Order, OrderStatus } from "@/types/order";
 import { ChefHat, Clock, CheckCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Badge, ORDER_STATUS_VARIANT } from "@/components/ui/Badge";
+import { cn, formatCurrency } from "@/lib/utils";
 
 const KITCHEN_PATH = "/dashboard/kitchen";
 
 const KITCHEN_STATUSES: OrderStatus[] = ["pending", "preparing", "ready"];
-
-const STATUS_STYLES: Record<
-  OrderStatus,
-  string
-> = {
-  pending: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-700",
-  preparing: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-700",
-  ready: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-200 dark:border-emerald-700",
-  served: "bg-violet-100 text-violet-800 border-violet-300 dark:bg-violet-900/30 dark:text-violet-200 dark:border-violet-700",
-  completed: "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600",
-  cancelled: "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-200 dark:border-red-700",
-};
 
 function playNewOrderSound() {
   try {
@@ -48,14 +37,9 @@ function playNewOrderSound() {
 
 function StatusBadge({ status }: { status: OrderStatus }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize",
-        STATUS_STYLES[status] ?? STATUS_STYLES.pending
-      )}
-    >
+    <Badge variant={ORDER_STATUS_VARIANT[status] ?? "muted"}>
       {status}
-    </span>
+    </Badge>
   );
 }
 
@@ -79,8 +63,8 @@ function OrderCard({
   return (
     <Card
       className={cn(
-        "transition-shadow",
-        order.status === "pending" && "ring-2 ring-amber-400/50"
+        "transition-all duration-200 hover:shadow-md",
+        order.status === "pending" && "ring-2 ring-warning/50"
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
@@ -106,14 +90,14 @@ function OrderCard({
                 ) : null}
               </span>
               <span className="text-muted-foreground shrink-0">
-                ${(item.price * item.quantity).toFixed(2)}
+                {formatCurrency(item.price * item.quantity)}
               </span>
             </li>
           ))}
         </ul>
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
           <span className="text-sm font-semibold text-foreground">
-            Total ${order.total.toFixed(2)}
+            Total {formatCurrency(order.total)}
           </span>
           {nextStatus && (
             <Button
@@ -215,7 +199,7 @@ function KitchenPageInner() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+        <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -227,7 +211,7 @@ function KitchenPageInner() {
             type="button"
             onClick={() => setTab(t)}
             className={cn(
-              "rounded-lg border px-4 py-2 text-sm font-medium transition-colors capitalize",
+              "rounded-xl border px-4 py-2 text-sm font-medium transition-all duration-200 capitalize",
               tab === t
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border bg-background text-foreground hover:bg-accent"
@@ -238,7 +222,7 @@ function KitchenPageInner() {
         ))}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filteredOrders.length === 0 ? (
           <p className="col-span-full text-center text-muted-foreground py-8">
             No {tab === "all" ? "active" : tab} orders.

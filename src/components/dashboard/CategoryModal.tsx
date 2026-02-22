@@ -89,7 +89,7 @@ export function CategoryModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="rounded-xl p-1 text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             aria-label="Close"
           >
             <span className="text-xl leading-none">&times;</span>

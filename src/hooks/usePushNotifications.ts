@@ -59,7 +59,9 @@ export function usePushNotifications() {
           ? "Notifications not supported in this browser. Try Chrome."
           : result.reason === "sw_failed"
             ? "Couldn’t register notification service. Try Chrome over HTTPS and refresh."
-            : "Couldn’t enable notifications. Use Chrome over HTTPS and allow notifications in browser and system settings.";
+            : result.reason === "push_service_error"
+              ? "Notification service isn’t ready yet. You can still use the app; alerts may be enabled later from Settings."
+              : "Couldn’t enable notifications. Use Chrome over HTTPS and allow notifications in browser and system settings.";
       console.warn("Push: getFCMToken failed:", result.reason, message);
       toast.info(message, 8000);
       return;

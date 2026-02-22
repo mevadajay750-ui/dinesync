@@ -19,9 +19,9 @@ const icons = {
 };
 
 const styles: Record<ToastType, string> = {
-  success: "border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-300",
-  error: "border-destructive/30 bg-destructive/10 text-destructive",
-  info: "border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300",
+  success: "border-success/30 bg-success/10 text-success",
+  error: "border-danger/30 bg-danger/10 text-danger",
+  info: "border-info/30 bg-info/10 text-info",
   default: "border-border bg-card text-card-foreground",
 };
 
@@ -36,7 +36,7 @@ export function Toast({ message, type, onDismiss }: ToastProps) {
     <div
       role="alert"
       className={cn(
-        "flex min-w-[280px] max-w-md items-start gap-3 rounded-lg border p-4 shadow-lg",
+        "flex min-w-[280px] max-w-md items-start gap-3 rounded-xl border p-4 shadow-lg transition-all duration-200",
         styles[type]
       )}
     >
@@ -45,7 +45,7 @@ export function Toast({ message, type, onDismiss }: ToastProps) {
       <button
         type="button"
         onClick={onDismiss}
-        className="shrink-0 rounded p-1 hover:bg-black/10 dark:hover:bg-white/10"
+        className="shrink-0 rounded-lg p-1 transition-colors duration-200 hover:bg-black/10 dark:hover:bg-white/10"
         aria-label="Dismiss"
       >
         <X className="h-4 w-4" />

@@ -17,17 +17,13 @@ import {
   startOfToday,
 } from "date-fns";
 import { IndianRupee, ShoppingBag, TrendingUp, BarChart3, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 const PRESETS = [
   { id: "today", label: "Today", getRange: () => ({ start: startOfToday(), end: endOfDay(new Date()) }) },
   { id: "7d", label: "7 days", getRange: () => ({ start: startOfDay(subDays(new Date(), 6)), end: endOfDay(new Date()) }) },
   { id: "30d", label: "30 days", getRange: () => ({ start: startOfDay(subDays(new Date(), 29)), end: endOfDay(new Date()) }) },
 ] as const;
-
-function formatCurrency(value: number): string {
-  return `₹${value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 function ReportsContent() {
   const { organization, loading: orgLoading } = useOrganization();
@@ -109,7 +105,7 @@ function ReportsContent() {
                 type="button"
                 onClick={() => applyPreset(p.id)}
                 className={cn(
-                  "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                  "rounded-xl border px-3 py-1.5 text-sm font-medium transition-all duration-200",
                   preset === p.id
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-background text-foreground hover:bg-accent"
@@ -128,7 +124,7 @@ function ReportsContent() {
                 if (d) setStartDate(startOfDay(d));
                 setPreset("7d");
               }}
-              className="rounded-md border border-input bg-background px-2 py-1.5 text-foreground"
+              className="h-10 rounded-lg border border-input bg-background px-2 py-1.5 text-foreground focus:ring-2 focus:ring-secondary focus:ring-offset-2"
             />
             <span>to</span>
             <input
@@ -139,98 +135,98 @@ function ReportsContent() {
                 if (d) setEndDate(endOfDay(d));
                 setPreset("7d");
               }}
-              className="rounded-md border border-input bg-background px-2 py-1.5 text-foreground"
+              className="h-10 rounded-lg border border-input bg-background px-2 py-1.5 text-foreground focus:ring-2 focus:ring-secondary focus:ring-offset-2"
             />
           </div>
         </CardContent>
       </Card>
 
       {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
           {error}
         </div>
       )}
 
       {/* Metrics cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <Card className="transition-all duration-200 hover:shadow-md">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Revenue
             </CardTitle>
-            <IndianRupee className="h-4 w-4 text-muted-foreground" />
+            <IndianRupee className="h-5 w-5 shrink-0 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                <span className="text-muted-foreground">Loading…</span>
+                <span className="text-sm text-muted-foreground">Loading…</span>
               </div>
             ) : metrics ? (
               <>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-3xl font-semibold text-foreground tracking-tight">
                   {formatCurrency(metrics.totalRevenue)}
                 </p>
-                <p className="text-xs text-muted-foreground">{dateLabel}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{dateLabel}</p>
               </>
             ) : (
               <>
-                <p className="text-2xl font-bold text-foreground">—</p>
-                <p className="text-xs text-muted-foreground">No data</p>
+                <p className="text-3xl font-semibold text-foreground">—</p>
+                <p className="mt-1 text-xs text-muted-foreground">No data</p>
               </>
             )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="transition-all duration-200 hover:shadow-md">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Orders
             </CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+            <ShoppingBag className="h-5 w-5 shrink-0 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                <span className="text-muted-foreground">Loading…</span>
+                <span className="text-sm text-muted-foreground">Loading…</span>
               </div>
             ) : metrics ? (
               <>
-                <p className="text-2xl font-bold text-foreground">{metrics.totalOrders}</p>
-                <p className="text-xs text-muted-foreground">Paid in period</p>
+                <p className="text-3xl font-semibold text-foreground tracking-tight">{metrics.totalOrders}</p>
+                <p className="mt-1 text-xs text-muted-foreground">Paid in period</p>
               </>
             ) : (
               <>
-                <p className="text-2xl font-bold text-foreground">—</p>
-                <p className="text-xs text-muted-foreground">No data</p>
+                <p className="text-3xl font-semibold text-foreground">—</p>
+                <p className="mt-1 text-xs text-muted-foreground">No data</p>
               </>
             )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="transition-all duration-200 hover:shadow-md">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Average Order Value
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-5 w-5 shrink-0 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                <span className="text-muted-foreground">Loading…</span>
+                <span className="text-sm text-muted-foreground">Loading…</span>
               </div>
             ) : metrics ? (
               <>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-3xl font-semibold text-foreground tracking-tight">
                   {formatCurrency(metrics.averageOrderValue)}
                 </p>
-                <p className="text-xs text-muted-foreground">Per order</p>
+                <p className="mt-1 text-xs text-muted-foreground">Per order</p>
               </>
             ) : (
               <>
-                <p className="text-2xl font-bold text-foreground">—</p>
-                <p className="text-xs text-muted-foreground">No data</p>
+                <p className="text-3xl font-semibold text-foreground">—</p>
+                <p className="mt-1 text-xs text-muted-foreground">No data</p>
               </>
             )}
           </CardContent>
@@ -268,14 +264,14 @@ function ReportsContent() {
               ))}
             </div>
           ) : bestSellers.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 py-12 text-center text-sm text-muted-foreground">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 py-12 text-center text-sm text-muted-foreground">
               <ShoppingBag className="mb-2 h-10 w-10 opacity-50" />
               <p>No orders with items in this period.</p>
               <p className="mt-1">Complete some orders to see best sellers.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-1">
+              <table className="w-full min-w-[320px] text-sm">
                 <thead>
                   <tr className="border-b border-border text-left text-muted-foreground">
                     <th className="pb-2 font-medium">#</th>
@@ -286,7 +282,7 @@ function ReportsContent() {
                 </thead>
                 <tbody>
                   {bestSellers.map((row, i) => (
-                    <tr key={row.menuItemId} className="border-b border-border/70">
+                    <tr key={row.menuItemId} className="border-b border-border/70 transition-colors duration-200 hover:bg-muted/30">
                       <td className="py-3">{i + 1}</td>
                       <td className="font-medium text-foreground">{row.name}</td>
                       <td className="text-right">{row.quantity}</td>

@@ -59,8 +59,8 @@ export function DashboardLayoutClient({ children, title }: DashboardLayoutClient
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <div className="hidden lg:block">
+    <div className="flex h-screen min-h-screen bg-background transition-colors duration-200">
+      <div className="hidden h-full shrink-0 lg:block">
         <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((c) => !c)} />
       </div>
       <MobileDrawer
@@ -69,9 +69,11 @@ export function DashboardLayoutClient({ children, title }: DashboardLayoutClient
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
       />
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex min-h-0 flex-1 flex-col min-w-0">
         <Topbar onMenuClick={() => setMobileOpen(true)} title={title} />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-6">
+          <div className="mx-auto max-w-7xl">{children}</div>
+        </main>
       </div>
     </div>
   );

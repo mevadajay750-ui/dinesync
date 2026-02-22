@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/providers/ToastProvider";
@@ -20,8 +21,9 @@ import {
   toggleAvailability,
 } from "@/services/menu.service";
 import type { MenuCategory, MenuItem } from "@/types/menu";
-import { Plus, Pencil, Trash2, UtensilsCrossed } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Plus, Pencil, Trash2, ImageIcon } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { cn, formatCurrency } from "@/lib/utils";
 
 const MENU_PATH = "/dashboard/menu";
 
@@ -43,13 +45,13 @@ function CategorySidebar({
   canManage: boolean;
 }) {
   return (
-    <aside className="w-full shrink-0 border-r border-border bg-muted/30 md:w-56 lg:w-64">
+    <aside className="w-full shrink-0 border-r border-border bg-muted/30 md:w-56 lg:w-64 rounded-xl">
       <div className="sticky top-0 flex flex-col p-2">
         <button
           type="button"
           onClick={() => onSelect(null)}
           className={cn(
-            "rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors",
+            "rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all duration-200",
             selectedId === null
               ? "bg-primary text-primary-foreground"
               : "text-foreground hover:bg-accent"
@@ -61,7 +63,7 @@ function CategorySidebar({
           <div
             key={c.id}
             className={cn(
-              "group flex items-center gap-1 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors",
+              "group flex items-center gap-1 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all duration-200",
               selectedId === c.id
                 ? "bg-primary text-primary-foreground"
                 : "text-foreground hover:bg-accent"
@@ -82,7 +84,7 @@ function CategorySidebar({
                     e.stopPropagation();
                     onEditCategory(c);
                   }}
-                  className="rounded p-1 hover:bg-background/20"
+                  className="rounded-lg p-1 hover:bg-background/20 transition-colors"
                   aria-label={`Edit ${c.name}`}
                 >
                   <Pencil className="h-3.5 w-3.5" />
@@ -93,7 +95,7 @@ function CategorySidebar({
                     e.stopPropagation();
                     onDeleteCategory(c);
                   }}
-                  className="rounded p-1 hover:bg-destructive/20"
+                  className="rounded-lg p-1 hover:bg-destructive/20 transition-colors"
                   aria-label={`Delete ${c.name}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -132,88 +134,90 @@ function ItemCard({
   onToggleAvailability: (item: MenuItem) => void;
 }) {
   return (
-    <Card className="overflow-hidden transition-shadow hover:shadow-md">
+    <Card className="overflow-hidden transition-all duration-200 hover:scale-[1.02]">
       <div className="aspect-4/3 relative bg-muted">
         {item.imageUrl ? (
-          <img
+          <Image
             src={item.imageUrl}
             alt=""
-            className="h-full w-full object-cover"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            <UtensilsCrossed className="h-12 w-12" />
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 border-2 border-dashed border-border bg-gray-100 px-4 dark:bg-gray-800/70">
+            <ImageIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" aria-hidden />
+            <span className="text-center text-xs font-medium text-gray-500 dark:text-gray-400">
+              No image
+            </span>
           </div>
         )}
-        <div className="absolute right-2 top-2 flex gap-1">
-          <span
-            className={cn(
-              "rounded-full px-2 py-0.5 text-xs font-medium",
-              item.isVeg
-                ? "bg-emerald-500/90 text-white dark:bg-emerald-600"
-                : "bg-red-500/90 text-white dark:bg-red-600"
-            )}
+        <div className="absolute right-2 top-2 flex gap-1.5">
+          <Badge
+            variant={item.isVeg ? "success" : "danger"}
+            className={item.isVeg ? "!bg-success !text-white" : "!bg-danger !text-white"}
           >
             {item.isVeg ? "Veg" : "Non-Veg"}
-          </span>
-          <span
-            className={cn(
-              "rounded-full px-2 py-0.5 text-xs font-medium",
-              item.isAvailable
-                ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
-                : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
-            )}
-          >
+          </Badge>
+          <Badge variant={item.isAvailable ? "success" : "warning"}>
             {item.isAvailable ? "In stock" : "Out of stock"}
-          </span>
+          </Badge>
         </div>
       </div>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
+      <CardContent className="p-5">
+        <div className="flex flex-col gap-3">
+          <div className="min-w-0">
             <h3 className="font-semibold text-foreground truncate">{item.name}</h3>
             {item.description && (
               <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
                 {item.description}
               </p>
             )}
-            <p className="mt-2 text-sm font-medium text-foreground">
-              ${Number(item.price).toFixed(2)}
-            </p>
           </div>
-          {canManage && (
-            <div className="flex shrink-0 gap-1">
-              <button
-                type="button"
-                onClick={() => onToggleAvailability(item)}
-                className={cn(
-                  "rounded-md px-2 py-1 text-xs font-medium transition-colors",
-                  item.isAvailable
-                    ? "bg-muted text-muted-foreground hover:bg-amber-500/20 hover:text-amber-700 dark:hover:text-amber-400"
-                    : "bg-muted text-muted-foreground hover:bg-emerald-500/20 hover:text-emerald-700 dark:hover:text-emerald-400"
-                )}
-                aria-label={item.isAvailable ? "Mark out of stock" : "Mark in stock"}
-              >
-                {item.isAvailable ? "Out" : "In"}
-              </button>
-              <button
-                type="button"
-                onClick={() => onEdit(item)}
-                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                aria-label={`Edit ${item.name}`}
-              >
-                <Pencil className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onDelete(item)}
-                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-ring"
-                aria-label={`Delete ${item.name}`}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          )}
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            {canManage ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onToggleAvailability(item)}
+                  className={cn(
+                    "shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all duration-200",
+                    item.isAvailable
+                      ? "bg-muted text-muted-foreground hover:bg-warning/20 hover:text-warning"
+                      : "bg-muted text-muted-foreground hover:bg-success/20 hover:text-success"
+                  )}
+                  aria-label={item.isAvailable ? "Mark out of stock" : "Mark in stock"}
+                >
+                  {item.isAvailable ? "Out" : "In"}
+                </button>
+                <p className="min-w-0 shrink-0 text-right text-sm font-medium text-foreground">
+                  {formatCurrency(Number(item.price))}
+                </p>
+                <div className="flex shrink-0 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onEdit(item)}
+                    className="rounded-xl p-2 text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    aria-label={`Edit ${item.name}`}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDelete(item)}
+                    className="rounded-xl p-2 text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-ring"
+                    aria-label={`Delete ${item.name}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p className="ml-auto text-sm font-medium text-foreground">
+                {formatCurrency(Number(item.price))}
+              </p>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -406,7 +410,7 @@ function MenuPageContent() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
           {error}
         </div>
       )}
@@ -423,14 +427,14 @@ function MenuPageContent() {
         />
         <main className="flex-1 min-w-0 p-4 md:p-6">
           {loading ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <Card key={i} className="overflow-hidden">
-                  <div className="aspect-4/3 animate-pulse bg-muted" />
-                  <CardContent className="p-4">
-                    <div className="h-5 w-32 animate-pulse rounded bg-muted" />
-                    <div className="mt-2 h-4 w-24 animate-pulse rounded bg-muted" />
-                    <div className="mt-3 h-5 w-16 animate-pulse rounded bg-muted" />
+                  <div className="aspect-4/3 animate-pulse bg-muted/50" />
+                  <CardContent className="p-5">
+                    <div className="h-5 w-32 animate-pulse rounded-lg bg-muted/50" />
+                    <div className="mt-2 h-4 w-24 animate-pulse rounded-lg bg-muted/50" />
+                    <div className="mt-3 h-5 w-16 animate-pulse rounded-lg bg-muted/50" />
                   </CardContent>
                 </Card>
               ))}
@@ -472,7 +476,7 @@ function MenuPageContent() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredItems.map((item) => (
                 <ItemCard
                   key={item.id}
@@ -518,8 +522,8 @@ function MenuPageContent() {
             onClick={() => !deleting && setDeleteCategoryTarget(null)}
             aria-hidden
           />
-          <Card className="relative z-10 w-full max-w-sm shadow-lg">
-            <CardContent className="p-6">
+          <Card className="relative z-10 mt-20 w-full max-w-sm shadow-lg">
+            <CardContent className="p-6 pt-7">
               <h3 id="delete-category-title" className="font-semibold text-foreground">
                 Delete category?
               </h3>
@@ -560,8 +564,8 @@ function MenuPageContent() {
             onClick={() => !deleting && setDeleteItemTarget(null)}
             aria-hidden
           />
-          <Card className="relative z-10 w-full max-w-sm shadow-lg">
-            <CardContent className="p-6">
+          <Card className="relative z-10 mt-20 w-full max-w-sm shadow-lg">
+            <CardContent className="p-6 pt-7">
               <h3 id="delete-item-title" className="font-semibold text-foreground">
                 Delete menu item?
               </h3>

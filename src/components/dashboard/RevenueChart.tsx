@@ -20,7 +20,7 @@ interface RevenueChartProps {
 export function RevenueChart({ data, loading }: RevenueChartProps) {
   if (loading) {
     return (
-      <div className="h-[280px] w-full animate-pulse rounded-lg bg-muted/50" />
+      <div className="h-[280px] w-full animate-pulse rounded-xl bg-muted/50" />
     );
   }
 
@@ -31,7 +31,7 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <div className="flex h-[280px] w-full items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 text-sm text-muted-foreground">
+      <div className="flex h-[280px] w-full items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 text-sm text-muted-foreground">
         No revenue data in this period
       </div>
     );
@@ -57,9 +57,9 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "hsl(var(--card))",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: "6px",
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
+              borderRadius: "0.75rem",
             }}
             labelFormatter={(_, payload) =>
               payload?.[0]?.payload?.date
@@ -73,8 +73,8 @@ export function RevenueChart({ data, loading }: RevenueChartProps) {
           />
           <Bar
             dataKey="revenue"
-            fill="hsl(var(--primary))"
-            radius={[4, 4, 0, 0]}
+            fill="var(--secondary)"
+            radius={[8, 8, 0, 0]}
             name="Revenue"
           />
         </BarChart>

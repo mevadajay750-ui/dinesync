@@ -37,49 +37,49 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Link href={ROUTES.DASHBOARD_ORDERS}>
-          <Card className="transition-colors hover:bg-accent/50">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Link href={ROUTES.DASHBOARD_ORDERS} className="transition-all duration-200 hover:scale-[1.02]">
+          <Card className="h-full transition-all duration-200 hover:shadow-md">
+            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Orders today
               </CardTitle>
-              <ClipboardList className="h-4 w-4 text-muted-foreground" />
+              <ClipboardList className="h-5 w-5 shrink-0 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">—</p>
-              <p className="text-xs text-muted-foreground">Protected route example</p>
+              <p className="text-3xl font-semibold tracking-tight">—</p>
+              <p className="mt-1 text-xs text-muted-foreground">Protected route example</p>
             </CardContent>
           </Card>
         </Link>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="h-full transition-all duration-200 hover:shadow-md">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Menu items</CardTitle>
-            <UtensilsCrossed className="h-4 w-4 text-muted-foreground" />
+            <UtensilsCrossed className="h-5 w-5 shrink-0 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">—</p>
-            <CardDescription>Add your menu to get started</CardDescription>
+            <p className="text-3xl font-semibold tracking-tight">—</p>
+            <CardDescription className="mt-1">Add your menu to get started</CardDescription>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="h-full transition-all duration-200 hover:shadow-md">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Revenue</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-5 w-5 shrink-0 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">—</p>
-            <CardDescription>Reports coming soon</CardDescription>
+            <p className="text-3xl font-semibold tracking-tight">—</p>
+            <CardDescription className="mt-1">Reports coming soon</CardDescription>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <Card className="h-full transition-all duration-200 hover:shadow-md">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Role</CardTitle>
-            <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
+            <LayoutDashboard className="h-5 w-5 shrink-0 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold capitalize">{user.role}</p>
-            <CardDescription>Your current role</CardDescription>
+            <p className="text-3xl font-semibold capitalize tracking-tight">{user.role}</p>
+            <CardDescription className="mt-1">Your current role</CardDescription>
           </CardContent>
         </Card>
       </div>

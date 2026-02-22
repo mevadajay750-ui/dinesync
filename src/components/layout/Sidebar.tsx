@@ -47,21 +47,21 @@ export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col border-r border-border bg-card transition-[width] duration-200",
-        collapsed ? "w-[72px]" : "w-64",
+        "flex h-full min-h-screen shrink-0 flex-col border-r border-white/10 bg-primary transition-[width] duration-200",
+        collapsed ? "w-[72px]" : "w-72 min-w-[18rem]",
         className
       )}
     >
-      <div className="flex h-14 items-center justify-between border-b border-border px-3">
+      <div className="flex h-14 items-center justify-between border-b border-white/10 px-3">
         {!collapsed && (
-          <Link href={ROUTES.DASHBOARD} className="font-semibold text-foreground">
+          <Link href={ROUTES.DASHBOARD} className="font-semibold text-primary-foreground transition-colors duration-200 hover:opacity-90">
             DineSync
           </Link>
         )}
         <button
           type="button"
           onClick={onToggle}
-          className="rounded p-2 hover:bg-accent"
+          className="rounded-xl p-2 text-primary-foreground/80 transition-all duration-200 hover:bg-white/10 hover:text-primary-foreground"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
@@ -80,10 +80,10 @@ export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  ? "bg-white/15 text-primary-foreground"
+                  : "text-primary-foreground/80 hover:bg-white/10 hover:text-primary-foreground"
               )}
             >
               <Icon className="h-5 w-5 shrink-0" />

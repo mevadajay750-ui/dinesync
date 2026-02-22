@@ -34,3 +34,6 @@ export const DEFAULT_TAX_RATE = 0.05;
 
 /** Default service charge (5%). */
 export const DEFAULT_SERVICE_CHARGE_RATE = 0.05;
+
+/** Currency symbol for display (INR). */
+export const CURRENCY_SYMBOL = "₹";

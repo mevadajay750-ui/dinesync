@@ -16,26 +16,15 @@ import {
 } from "@/services/table.service";
 import type { Table, TableStatus } from "@/types/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Badge, TABLE_STATUS_VARIANT } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
 const TABLES_PATH = "/dashboard/tables";
 
-const STATUS_STYLES: Record<
-  TableStatus,
-  { label: string; className: string }
-> = {
-  available: {
-    label: "Available",
-    className: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
-  },
-  occupied: {
-    label: "Occupied",
-    className: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
-  },
-  billing: {
-    label: "Billing",
-    className: "bg-red-500/15 text-red-700 dark:text-red-400",
-  },
+const STATUS_LABELS: Record<TableStatus, string> = {
+  available: "Available",
+  occupied: "Occupied",
+  billing: "Billing",
 };
 
 function TableCard({
@@ -49,11 +38,11 @@ function TableCard({
   onEdit: (t: Table) => void;
   onDelete: (t: Table) => void;
 }) {
-  const statusStyle = STATUS_STYLES[table.status];
+  const variant = TABLE_STATUS_VARIANT[table.status] ?? "muted";
   return (
-    <Card className="transition-shadow hover:shadow-md">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-2">
+    <Card className="flex h-full flex-col transition-all duration-200 hover:scale-[1.02]">
+      <CardContent className="flex flex-1 flex-col p-5 pt-6">
+        <div className="flex flex-1 items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <h3 className="font-semibold text-foreground truncate">
               {table.name}
@@ -66,21 +55,16 @@ function TableCard({
             <p className="text-sm text-muted-foreground mt-1">
               Capacity: {table.capacity}
             </p>
-            <span
-              className={cn(
-                "inline-block mt-2 rounded-full px-2.5 py-0.5 text-xs font-medium",
-                statusStyle.className
-              )}
-            >
-              {statusStyle.label}
-            </span>
+            <Badge variant={variant} className="mt-2">
+              {STATUS_LABELS[table.status]}
+            </Badge>
           </div>
           {canManage && (
             <div className="flex shrink-0 gap-1">
               <button
                 type="button"
                 onClick={() => onEdit(table)}
-                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                className="rounded-xl p-2 text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 aria-label={`Edit ${table.name}`}
               >
                 <Pencil className="h-4 w-4" />
@@ -88,7 +72,7 @@ function TableCard({
               <button
                 type="button"
                 onClick={() => onDelete(table)}
-                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-ring"
+                className="rounded-xl p-2 text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-ring"
                 aria-label={`Delete ${table.name}`}
               >
                 <Trash2 className="h-4 w-4" />
@@ -193,19 +177,19 @@ function TablesPageContent() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i} className="overflow-hidden">
-              <CardContent className="p-4">
-                <div className="h-5 w-24 animate-pulse rounded bg-muted" />
-                <div className="mt-2 h-4 w-16 animate-pulse rounded bg-muted" />
-                <div className="mt-3 h-6 w-20 animate-pulse rounded-full bg-muted" />
+              <CardContent className="p-5">
+                <div className="h-5 w-24 animate-pulse rounded-lg bg-muted/50" />
+                <div className="mt-2 h-4 w-16 animate-pulse rounded-lg bg-muted/50" />
+                <div className="mt-3 h-6 w-20 animate-pulse rounded-full bg-muted/50" />
               </CardContent>
             </Card>
           ))}
@@ -228,7 +212,7 @@ function TablesPageContent() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {tables.map((table) => (
             <TableCard
               key={table.id}
@@ -261,8 +245,8 @@ function TablesPageContent() {
             onClick={() => !deleting && setDeleteTarget(null)}
             aria-hidden
           />
-          <Card className="relative z-10 w-full max-w-sm shadow-lg">
-            <CardContent className="p-6">
+          <Card className="relative z-10 mt-20 w-full max-w-sm shadow-lg rounded-xl">
+            <CardContent className="p-6 pt-7">
               <h3 id="delete-modal-title" className="font-semibold text-foreground">
                 Delete table?
               </h3>

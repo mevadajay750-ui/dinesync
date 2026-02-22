@@ -91,7 +91,7 @@ export default function LoginPage() {
             {...register("password")}
           />
           {error && (
-            <p className="text-sm text-destructive" role="alert">
+            <p className="mt-1 text-sm text-danger" role="alert">
               {error}
             </p>
           )}

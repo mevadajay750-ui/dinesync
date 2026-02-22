@@ -24,7 +24,7 @@ import type { Order } from "@/types/order";
 import type { PaymentMethod } from "@/types/payment";
 import { DEFAULT_TAX_RATE, DEFAULT_SERVICE_CHARGE_RATE } from "@/lib/constants";
 import { ArrowLeft, Receipt } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 const BILLING_PATH = "/dashboard/orders";
 
@@ -98,7 +98,7 @@ function ConfirmModal({
       aria-modal="true"
       aria-labelledby="confirm-title"
     >
-      <div className="w-full max-w-sm rounded-lg border border-border bg-card p-6 shadow-lg">
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-6 shadow-lg">
         <h2 id="confirm-title" className="text-lg font-semibold text-foreground">
           Confirm payment
         </h2>
@@ -286,7 +286,7 @@ function BillingPageInner() {
           <ArrowLeft className="h-4 w-4" />
           Back to orders
         </Link>
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
           {error}
         </div>
       </div>
@@ -311,7 +311,7 @@ function BillingPageInner() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+        <div className="rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
           {error}
         </div>
       )}
@@ -328,7 +328,7 @@ function BillingPageInner() {
             <h2 className="mb-3 text-sm font-semibold text-foreground">
               Ordered items
             </h2>
-            <ul className="space-y-2 rounded-lg border border-border p-3">
+            <ul className="space-y-2 rounded-xl border border-border p-3">
               {order.items.map((item, idx) => (
                 <li
                   key={`${item.menuItemId}-${idx}`}
@@ -338,7 +338,7 @@ function BillingPageInner() {
                     {item.name} × {item.quantity}
                   </span>
                   <span className="text-muted-foreground">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {formatCurrency(item.price * item.quantity)}
                   </span>
                 </li>
               ))}
@@ -352,22 +352,22 @@ function BillingPageInner() {
             <div className="space-y-1.5 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Tax ({Math.round(DEFAULT_TAX_RATE * 100)}%)</span>
-                <span>${tax.toFixed(2)}</span>
+                <span>{formatCurrency(tax)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Service charge (
                   {Math.round(DEFAULT_SERVICE_CHARGE_RATE * 100)}%)
                 </span>
-                <span>${serviceCharge.toFixed(2)}</span>
+                <span>{formatCurrency(serviceCharge)}</span>
               </div>
               {discountAmount > 0 && (
                 <div className="flex justify-between text-muted-foreground">
                   <span>Discount</span>
-                  <span>-${discountAmount.toFixed(2)}</span>
+                  <span>-{formatCurrency(discountAmount)}</span>
                 </div>
               )}
               <div
@@ -377,7 +377,7 @@ function BillingPageInner() {
                 )}
               >
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>{formatCurrency(total)}</span>
               </div>
             </div>
           </section>
@@ -391,7 +391,7 @@ function BillingPageInner() {
                   </label>
                   <select
                     {...register("discountType")}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
                   >
                     <option value="flat">Flat amount</option>
                     <option value="percent">Percentage</option>
@@ -401,7 +401,7 @@ function BillingPageInner() {
                   type="number"
                   step={discountType === "percent" ? 1 : 0.01}
                   min={0}
-                  label={discountType === "percent" ? "Discount (%)" : "Discount ($)"}
+                  label={discountType === "percent" ? "Discount (%)" : "Discount (₹)"}
                   error={errors.discountValue?.message}
                   {...register("discountValue", { valueAsNumber: true })}
                 />
@@ -412,7 +412,7 @@ function BillingPageInner() {
                 </label>
                 <select
                   {...register("paymentMethod")}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
                 >
                   {PAYMENT_METHODS.map((pm) => (
                     <option key={pm.value} value={pm.value}>

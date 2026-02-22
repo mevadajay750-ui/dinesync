@@ -16,3 +16,8 @@ export function formatDateTime(date: Date | string): string {
     timeStyle: "short",
   }).format(typeof date === "string" ? new Date(date) : date);
 }
+
+/** Format amount in INR (Indian Rupee). Use across the app for currency display. */
+export function formatCurrency(value: number): string {
+  return `₹${value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}

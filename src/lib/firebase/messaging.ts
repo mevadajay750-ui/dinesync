@@ -47,6 +47,11 @@ function waitForActive(reg: ServiceWorkerRegistration): Promise<ServiceWorkerReg
   });
 }
 
+/** Short delay so the push service is ready after SW becomes active. */
+function delay(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 /**
  * Get or register the Firebase Cloud Messaging service worker.
  * Waits until it is active so getToken() does not hit "push service error".
@@ -65,11 +70,15 @@ export async function getMessagingServiceWorker(): Promise<ServiceWorkerRegistra
 
 export type GetFCMTokenResult =
   | { ok: true; token: string }
-  | { ok: false; reason: "no_messaging" | "sw_failed" | "token_failed" };
+  | {
+      ok: false;
+      reason: "no_messaging" | "sw_failed" | "token_failed" | "push_service_error";
+    };
 
 /**
  * Get FCM token for this browser/device. Requires VAPID key from Firebase Console.
  * Registers the messaging SW first, waits for it to be active, then gets token with retries.
+ * "push service error" is retried with longer backoff since the browser push service may not be ready yet.
  */
 export async function getFCMToken(vapidKey: string): Promise<GetFCMTokenResult> {
   const instance = getMessagingInstance();
@@ -78,8 +87,11 @@ export async function getFCMToken(vapidKey: string): Promise<GetFCMTokenResult> 
   const registration = await getMessagingServiceWorker();
   if (!registration) return { ok: false, reason: "sw_failed" };
 
-  const maxAttempts = 3;
-  const delayMs = 1500;
+  // Give the push service a moment to be ready after SW is active
+  await delay(1500);
+
+  const maxAttempts = 5;
+  const baseDelayMs = 2000;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -91,14 +103,20 @@ export async function getFCMToken(vapidKey: string): Promise<GetFCMTokenResult> 
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       const isPushServiceError =
-        msg.includes("push service error") || msg.includes("push service not available");
+        msg.includes("push service error") ||
+        msg.includes("push service not available") ||
+        msg.includes("Push service");
       console.warn(`FCM getToken attempt ${attempt}/${maxAttempts} failed:`, msg);
       if (attempt === maxAttempts) {
         console.error("FCM getToken error:", error);
-        return { ok: false, reason: "token_failed" };
+        return {
+          ok: false,
+          reason: isPushServiceError ? "push_service_error" : "token_failed",
+        };
       }
       if (isPushServiceError || msg.includes("AbortError")) {
-        await new Promise((r) => setTimeout(r, delayMs));
+        const backoffMs = baseDelayMs * attempt;
+        await delay(backoffMs);
       } else {
         return { ok: false, reason: "token_failed" };
       }

@@ -21,18 +21,10 @@ import type { Order, OrderItem, OrderStatus } from "@/types/order";
 import type { MenuCategory, MenuItem } from "@/types/menu";
 import type { Table } from "@/types/table";
 import { Plus, Minus, Trash2, ShoppingCart, CheckCircle, Receipt } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Badge, ORDER_STATUS_VARIANT } from "@/components/ui/Badge";
+import { cn, formatCurrency } from "@/lib/utils";
 
 const ORDERS_PATH = "/dashboard/orders";
-
-const STATUS_BADGE_STYLES: Record<OrderStatus, string> = {
-  pending: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200",
-  preparing: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200",
-  ready: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200",
-  served: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-200",
-  completed: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200",
-};
 
 /** Cart line for UI: OrderItem with optional temp notes while editing. */
 interface CartLine extends OrderItem {
@@ -66,7 +58,7 @@ function TableSelect({
           if (t) onChange(t.id, t.name);
         }}
         disabled={disabled}
-        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
+        className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 disabled:opacity-50"
       >
         <option value="">Select table</option>
         {available.map((t) => (
@@ -251,7 +243,7 @@ function OrdersPageInner({
       </div>
 
       {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+        <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-2 text-sm text-danger">
           {error}
         </div>
       )}
@@ -278,7 +270,7 @@ function OrdersPageInner({
                     type="button"
                     onClick={() => setSelectedCategoryId(null)}
                     className={cn(
-                      "rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors",
+                      "rounded-xl border px-3 py-1.5 text-sm font-medium transition-all duration-200",
                       selectedCategoryId === null
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-border bg-background text-foreground hover:bg-accent"
@@ -292,7 +284,7 @@ function OrdersPageInner({
                       type="button"
                       onClick={() => setSelectedCategoryId(c.id)}
                       className={cn(
-                        "rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors",
+                        "rounded-xl border px-3 py-1.5 text-sm font-medium transition-all duration-200",
                         selectedCategoryId === c.id
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-background text-foreground hover:bg-accent"
@@ -313,13 +305,13 @@ function OrdersPageInner({
                         key={item.id}
                         type="button"
                         onClick={() => addToCart(item)}
-                        className="flex flex-col rounded-lg border border-border bg-card p-3 text-left shadow-sm transition-colors hover:border-primary hover:bg-accent/50"
+                        className="flex flex-col rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-all duration-200 hover:scale-[1.02] hover:border-secondary hover:shadow-md"
                       >
                         <span className="font-medium text-foreground">
                           {item.name}
                         </span>
-                        <span className="text-sm text-muted-foreground">
-                          ${item.price.toFixed(2)}
+                        <span className="mt-0.5 text-sm text-muted-foreground text-right">
+                          {formatCurrency(item.price)}
                         </span>
                       </button>
                     ))}
@@ -345,7 +337,7 @@ function OrdersPageInner({
                   {cart.map((line) => (
                     <li
                       key={line.key}
-                      className="flex flex-col gap-1.5 rounded-lg border border-border p-2"
+                      className="flex flex-col gap-1.5 rounded-xl border border-border p-3 transition-all duration-200"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-medium text-foreground">
@@ -355,7 +347,7 @@ function OrdersPageInner({
                           <button
                             type="button"
                             onClick={() => updateQuantity(line.key, -1)}
-                            className="flex h-8 w-8 items-center justify-center rounded border border-border hover:bg-accent"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border transition-all duration-200 hover:bg-accent"
                             aria-label="Decrease quantity"
                           >
                             <Minus className="h-3.5 w-3.5" />
@@ -366,7 +358,7 @@ function OrdersPageInner({
                           <button
                             type="button"
                             onClick={() => updateQuantity(line.key, 1)}
-                            className="flex h-8 w-8 items-center justify-center rounded border border-border hover:bg-accent"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border transition-all duration-200 hover:bg-accent"
                             aria-label="Increase quantity"
                           >
                             <Plus className="h-3.5 w-3.5" />
@@ -374,7 +366,7 @@ function OrdersPageInner({
                           <button
                             type="button"
                             onClick={() => removeLine(line.key)}
-                            className="rounded p-1 text-muted-foreground hover:bg-destructive/20 hover:text-destructive"
+                            className="rounded-lg p-1 text-muted-foreground transition-all duration-200 hover:bg-destructive/20 hover:text-destructive"
                             aria-label="Remove"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -391,7 +383,7 @@ function OrdersPageInner({
                         className="text-sm"
                       />
                       <p className="text-xs text-muted-foreground">
-                        ${(line.price * line.quantity).toFixed(2)}
+                        {formatCurrency(line.price * line.quantity)}
                       </p>
                     </li>
                   ))}
@@ -399,7 +391,7 @@ function OrdersPageInner({
               )}
 
               {cart.length > 0 && !tableId && (
-                <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                <p className="rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
                   Select a table above to submit this order.
                 </p>
               )}
@@ -409,19 +401,19 @@ function OrdersPageInner({
                   <div className="space-y-1 border-t border-border pt-3 text-sm">
                     <div className="flex justify-between text-muted-foreground">
                       <span>Subtotal</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span>{formatCurrency(subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
                       <span>Tax (5%)</span>
-                      <span>${tax.toFixed(2)}</span>
+                      <span>{formatCurrency(tax)}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
                       <span>Service (5%)</span>
-                      <span>${serviceCharge.toFixed(2)}</span>
+                      <span>{formatCurrency(serviceCharge)}</span>
                     </div>
                     <div className="flex justify-between pt-1 font-semibold text-foreground">
                       <span>Total</span>
-                      <span>${total.toFixed(2)}</span>
+                      <span>{formatCurrency(total)}</span>
                     </div>
                   </div>
                   <Button
@@ -457,16 +449,11 @@ function OrdersPageInner({
                     <span className="font-medium text-foreground">
                       Table {order.tableName}
                     </span>
-                    <span
-                      className={cn(
-                        "rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
-                        STATUS_BADGE_STYLES[order.status]
-                      )}
-                    >
+                    <Badge variant={ORDER_STATUS_VARIANT[order.status] ?? "muted"}>
                       {order.status}
-                    </span>
+                    </Badge>
                     <span className="text-sm text-muted-foreground">
-                      {order.items.length} item(s) · ${order.total.toFixed(2)}
+                      {order.items.length} item(s) · {formatCurrency(order.total)}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -485,7 +472,7 @@ function OrdersPageInner({
                     {order.status === "served" && (
                       <Link
                         href={`/dashboard/orders/${order.id}/billing`}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-input bg-background px-3 text-sm font-medium transition-all duration-200 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       >
                         <Receipt className="h-4 w-4" />
                         Billing

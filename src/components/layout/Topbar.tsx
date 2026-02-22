@@ -19,12 +19,12 @@ export function Topbar({ onMenuClick, title = "Dashboard" }: TopbarProps) {
   };
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4">
+    <header className="flex h-14 items-center gap-4 border-b border-border bg-surface px-4 lg:px-6 transition-colors duration-200">
       {onMenuClick && (
         <button
           type="button"
           onClick={onMenuClick}
-          className="rounded p-2 hover:bg-accent lg:hidden"
+          className="rounded-xl p-2 text-foreground transition-all duration-200 hover:bg-accent lg:hidden"
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
@@ -35,7 +35,7 @@ export function Topbar({ onMenuClick, title = "Dashboard" }: TopbarProps) {
         <button
           type="button"
           onClick={toggleTheme}
-          className="rounded p-2 hover:bg-accent"
+          className="rounded-xl p-2 text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground"
           aria-label={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
         >
           {resolvedTheme === "dark" ? (

@@ -164,8 +164,8 @@ export default function CreateOrganizationPage() {
               id="businessType"
               aria-invalid={!!errors.businessType}
               className={cn(
-                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                errors.businessType && "border-destructive focus-visible:ring-destructive"
+                "flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2",
+                errors.businessType && "border-danger focus-visible:ring-danger"
               )}
               {...register("businessType", { required: true })}
             >
@@ -177,7 +177,7 @@ export default function CreateOrganizationPage() {
               ))}
             </select>
             {errors.businessType && (
-              <p className="mt-1.5 text-sm text-destructive" role="alert">
+              <p className="mt-1 text-sm text-danger" role="alert">
                 {errors.businessType.message}
               </p>
             )}
@@ -191,7 +191,7 @@ export default function CreateOrganizationPage() {
               ref={fileInputRef}
               type="file"
               accept="image/png,image/jpeg,image/webp"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:mr-4 file:rounded file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2"
               onChange={(e) => setValue("logo", e.target.files ?? undefined, { shouldValidate: true })}
             />
             {logoFile instanceof FileList && logoFile[0] && (
@@ -202,7 +202,7 @@ export default function CreateOrganizationPage() {
           </div>
 
           {submitError && (
-            <p className="text-sm text-destructive" role="alert">
+            <p className="mt-1 text-sm text-danger" role="alert">
               {submitError}
             </p>
           )}

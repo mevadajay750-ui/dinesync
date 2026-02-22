@@ -53,20 +53,20 @@ export function MobileDrawer({ open, onClose, collapsed, onToggleCollapse }: Mob
       />
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 transition-transform duration-200 lg:hidden",
+          "fixed inset-y-0 left-0 z-50 w-72 min-w-[18rem] transition-transform duration-200 lg:hidden",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="relative flex h-full flex-col bg-card">
+        <div className="relative flex h-full flex-col bg-primary">
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-2 top-2 z-10 rounded p-2 hover:bg-accent"
+            className="absolute right-2 top-2 z-10 rounded-xl p-2 text-primary-foreground/80 transition-all duration-200 hover:bg-white/10 hover:text-primary-foreground"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
           </button>
-          <Sidebar collapsed={false} onToggle={onToggleCollapse} className="w-64 border-0" />
+          <Sidebar collapsed={false} onToggle={onToggleCollapse} className="w-72 min-w-[18rem] border-0" />
         </div>
       </div>
     </>

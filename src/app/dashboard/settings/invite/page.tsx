@@ -203,9 +203,9 @@ function InvitePageContent() {
                 id="role"
                 aria-invalid={!!errors.role}
                 className={cn(
-                  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2",
                   errors.role &&
-                    "border-destructive focus-visible:ring-destructive"
+                    "border-danger focus-visible:ring-danger"
                 )}
                 {...register("role", { required: true })}
               >
@@ -217,7 +217,7 @@ function InvitePageContent() {
                 ))}
               </select>
               {errors.role && (
-                <p className="mt-1.5 text-sm text-destructive" role="alert">
+                <p className="mt-1 text-sm text-danger" role="alert">
                   {errors.role.message}
                 </p>
               )}
