@@ -26,6 +26,14 @@ export function usePushNotifications() {
   const registerToken = useCallback(async () => {
     if (!user || !isPushSupported()) return;
 
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      toast.info(
+        "Notifications require HTTPS. Open this site over HTTPS (or use localhost) to enable them.",
+        8000
+      );
+      return;
+    }
+
     const env = assertEnv();
     const vapidKey = env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
     if (!vapidKey) {
@@ -44,21 +52,22 @@ export function usePushNotifications() {
       return;
     }
 
-    const token = await getFCMToken(vapidKey);
-    if (!token) {
-      console.error(
-        "Push: Could not get FCM token. If you see 'push service error': use HTTPS (or localhost), try Chrome, and ensure OS/browser allow notifications."
-      );
-      toast.info(
-        "Notifications couldn’t be enabled. Try Chrome over HTTPS or check system notification settings.",
-        8000
-      );
+    const result = await getFCMToken(vapidKey);
+    if (!result.ok) {
+      const message =
+        result.reason === "no_messaging"
+          ? "Notifications not supported in this browser. Try Chrome."
+          : result.reason === "sw_failed"
+            ? "Couldn’t register notification service. Try Chrome over HTTPS and refresh."
+            : "Couldn’t enable notifications. Use Chrome over HTTPS and allow notifications in browser and system settings.";
+      console.warn("Push: getFCMToken failed:", result.reason, message);
+      toast.info(message, 8000);
       return;
     }
 
     try {
       await saveDeviceToken({
-        token,
+        token: result.token,
         userId: user.uid,
         organizationId: user.organizationId,
         role: user.role,

@@ -63,16 +63,20 @@ export async function getMessagingServiceWorker(): Promise<ServiceWorkerRegistra
   }
 }
 
+export type GetFCMTokenResult =
+  | { ok: true; token: string }
+  | { ok: false; reason: "no_messaging" | "sw_failed" | "token_failed" };
+
 /**
  * Get FCM token for this browser/device. Requires VAPID key from Firebase Console.
  * Registers the messaging SW first, waits for it to be active, then gets token with retries.
  */
-export async function getFCMToken(vapidKey: string): Promise<string | null> {
+export async function getFCMToken(vapidKey: string): Promise<GetFCMTokenResult> {
   const instance = getMessagingInstance();
-  if (!instance) return null;
+  if (!instance) return { ok: false, reason: "no_messaging" };
 
   const registration = await getMessagingServiceWorker();
-  if (!registration) return null;
+  if (!registration) return { ok: false, reason: "sw_failed" };
 
   const maxAttempts = 3;
   const delayMs = 1500;
@@ -83,7 +87,7 @@ export async function getFCMToken(vapidKey: string): Promise<string | null> {
         vapidKey,
         serviceWorkerRegistration: registration,
       });
-      return token ?? null;
+      return token ? { ok: true, token } : { ok: false, reason: "token_failed" };
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       const isPushServiceError =
@@ -91,16 +95,16 @@ export async function getFCMToken(vapidKey: string): Promise<string | null> {
       console.warn(`FCM getToken attempt ${attempt}/${maxAttempts} failed:`, msg);
       if (attempt === maxAttempts) {
         console.error("FCM getToken error:", error);
-        return null;
+        return { ok: false, reason: "token_failed" };
       }
       if (isPushServiceError || msg.includes("AbortError")) {
         await new Promise((r) => setTimeout(r, delayMs));
       } else {
-        return null;
+        return { ok: false, reason: "token_failed" };
       }
     }
   }
-  return null;
+  return { ok: false, reason: "token_failed" };
 }
 
 export interface ForegroundMessagePayload {
