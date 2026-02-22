@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DineSync
 
-## Getting Started
+Production-grade SaaS boilerplate for restaurant management. Built with Next.js 14+, TypeScript, Tailwind CSS, and Firebase.
 
-First, run the development server:
+## Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript (strict)
+- **Styling:** Tailwind CSS 4
+- **Backend:** Firebase (Auth, Firestore)
+- **Notifications:** Firebase Cloud Messaging (Web Push ready)
+- **Validation:** Zod
+- **Forms:** React Hook Form + @hookform/resolvers
+- **Package manager:** pnpm
+
+## Getting started
+
+### 1. Install dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure Firebase
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Create a project in [Firebase Console](https://console.firebase.google.com).
+2. Copy `.env.example` to `.env.local`.
+3. Add your Firebase config from **Project settings > General > Your apps**:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+NEXT_PUBLIC_FIREBASE_APP_ID=...
+```
 
-## Learn More
+4. Enable **Email/Password** and **Google** sign-in in Authentication > Sign-in method.
+5. Create Firestore database (start in test mode for dev).
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Run the app
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open [http://localhost:3000](http://localhost:3000). Register a new account (creates an organization and owner user), then use the dashboard.
 
-## Deploy on Vercel
+## Project structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/
+│   ├── (auth)/login, register
+│   ├── dashboard/           # Protected routes
+│   ├── api/auth/session      # Session cookie API
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── ui/                   # Button, Input, Card
+│   ├── layout/               # Sidebar, Topbar, MobileDrawer
+│   ├── shared/               # Toast
+│   └── providers/            # Auth, Theme, Toast
+├── lib/
+│   ├── firebase/             # config, auth, firestore, messaging
+│   ├── env.ts                # Env validation (Zod)
+│   ├── utils.ts
+│   └── constants.ts
+├── hooks/
+│   ├── useAuth.ts
+│   └── useOrganization.ts
+├── types/
+├── services/                 # user, organization, order
+└── middleware.ts             # Cookie-based route protection
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Features
+
+- **Auth:** Email/password and Google sign-in, protected routes via middleware + client redirect
+- **Multi-tenant:** User model with `organizationId` and roles (owner, manager, waiter, kitchen)
+- **Dashboard:** Collapsible sidebar, topbar with theme toggle and sign out, mobile drawer
+- **UI:** Reusable Button, Input, Card; toast notifications; dark mode
+- **Firestore:** Organizations and users collections; order service and types ready for menu/tables
+
+## Scripts
+
+- `pnpm dev` – Start dev server
+- `pnpm build` – Production build (works without `.env`; Firebase required at runtime)
+- `pnpm start` – Start production server
+- `pnpm lint` – ESLint
+- `pnpm format` – Prettier
+
+## Environment variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_FIREBASE_*` | Yes (at runtime) | Firebase client config |
+| `NEXT_PUBLIC_USE_FIREBASE_EMULATOR` | No | Set `true` to use Auth/Firestore emulators |
+
+Build succeeds without Firebase env vars; the app will prompt you to configure them when you use auth in the browser.
+
+## License
+
+MIT

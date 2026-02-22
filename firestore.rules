@@ -1,0 +1,249 @@
+rules_version = '2';
+
+// DineSync Firestore security rules — production multi-tenant SaaS.
+// Deploy: firebase deploy --only firestore:rules
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isSameOrganization(orgId) {
+      return isAuthenticated() && getUserData().organizationId == orgId;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    function isOwner() {
+      return hasRole('owner');
+    }
+
+    function isManagerOrAbove() {
+      return hasRole('owner') || hasRole('manager');
+    }
+
+    function isWaiterOrAbove() {
+      return hasRole('owner') || hasRole('manager') || hasRole('waiter');
+    }
+
+    function docOrgId() {
+      return resource.data.organizationId;
+    }
+
+    function requestOrgId() {
+      return request.resource.data.organizationId;
+    }
+
+    // Only owner may change role; organizationId is immutable after create.
+    function userRoleAndOrgUnchanged() {
+      return request.resource.data.role == resource.data.role
+        && request.resource.data.organizationId == resource.data.organizationId;
+    }
+
+    function orgIdUnchanged() {
+      return requestOrgId() == docOrgId();
+    }
+
+    // Kitchen may only update order status (and updatedAt).
+    function onlyOrderStatusUpdated() {
+      let affected = request.resource.data.diff(resource.data).affectedKeys();
+      return affected.hasOnly(['status', 'updatedAt']);
+    }
+
+    // Waiter may only update items and totals (and updatedAt).
+    function onlyOrderItemsAndTotalsUpdated() {
+      let affected = request.resource.data.diff(resource.data).affectedKeys();
+      return affected.hasOnly(['items', 'subtotal', 'tax', 'serviceCharge', 'total', 'updatedAt']);
+    }
+
+    // Order is not locked (completed/cancelled orders cannot be edited).
+    function orderNotCompletedOrCancelled() {
+      return resource.data.status != 'completed' && resource.data.status != 'cancelled';
+    }
+
+    // -------------------------------------------------------------------------
+    // organizations/{orgId}
+    // Owner: full access. Others in org: read only (name, settings for UI).
+    // -------------------------------------------------------------------------
+    match /organizations/{orgId} {
+      allow read: if isSameOrganization(orgId);
+      allow create: if isAuthenticated()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.keys().hasAll(['name', 'businessType', 'ownerId', 'createdAt'])
+        && (!('organizationId' in request.resource.data) || request.resource.data.organizationId == orgId);
+      allow update, delete: if isOwner() && isSameOrganization(orgId)
+        && (!('organizationId' in resource.data) || orgIdUnchanged());
+    }
+
+    // -------------------------------------------------------------------------
+    // users/{userId}
+    // Users read/write own doc only. Role/org immutable by non-owners.
+    // Owner may update any user in their org (e.g. role changes).
+    // -------------------------------------------------------------------------
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated()
+        && request.auth.uid == userId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.organizationId is string
+        && request.resource.data.role is string;
+      allow update: if isAuthenticated() && (
+        (request.auth.uid == userId && userRoleAndOrgUnchanged())
+        || (isOwner() && isSameOrganization(resource.data.organizationId))
+      );
+      allow delete: if isOwner() && request.auth.uid != userId
+        && isSameOrganization(resource.data.organizationId);
+    }
+
+    // -------------------------------------------------------------------------
+    // tables/{tableId}
+    // Owner, manager: create/update/delete. All roles in org: read.
+    // organizationId must match user's org and cannot be changed after create.
+    // -------------------------------------------------------------------------
+    match /tables/{tableId} {
+      allow read: if isAuthenticated() && isSameOrganization(docOrgId());
+      allow create: if isManagerOrAbove() && isSameOrganization(requestOrgId());
+      allow update, delete: if isManagerOrAbove() && isSameOrganization(docOrgId()) && orgIdUnchanged();
+    }
+
+    // -------------------------------------------------------------------------
+    // menuCategories/{categoryId}
+    // Read: all roles (same org). Write: owner, manager only.
+    // organizationId cannot be changed after create.
+    // -------------------------------------------------------------------------
+    match /menuCategories/{categoryId} {
+      allow read: if isAuthenticated() && isSameOrganization(docOrgId());
+      allow create: if isManagerOrAbove() && isSameOrganization(requestOrgId());
+      allow update, delete: if isManagerOrAbove() && isSameOrganization(docOrgId()) && orgIdUnchanged();
+    }
+
+    // -------------------------------------------------------------------------
+    // menuItems/{menuId}
+    // Read: all roles (same org). Write: owner, manager only.
+    // organizationId cannot be changed after create.
+    // -------------------------------------------------------------------------
+    match /menuItems/{menuId} {
+      allow read: if isAuthenticated() && isSameOrganization(docOrgId());
+      allow create: if isManagerOrAbove() && isSameOrganization(requestOrgId());
+      allow update, delete: if isManagerOrAbove() && isSameOrganization(docOrgId()) && orgIdUnchanged();
+    }
+
+    // -------------------------------------------------------------------------
+    // orders/{orderId}
+    // Read: all roles (same org) for workflow. Reports dashboard (date-range
+    // queries) is restricted to owner/manager via RoleGuard in the app.
+    // Create: waiter, manager, owner.
+    // Update: waiter (items only or status only when not completed), kitchen (status only),
+    //         manager/owner (full). Prevent: changing organizationId, editing completed/cancelled.
+    // -------------------------------------------------------------------------
+    match /orders/{orderId} {
+      allow read: if (isWaiterOrAbove() || hasRole('kitchen')) && isSameOrganization(docOrgId());
+      allow create: if isWaiterOrAbove() && isSameOrganization(requestOrgId());
+      allow update: if isSameOrganization(docOrgId()) && orgIdUnchanged()
+        && orderNotCompletedOrCancelled()
+        && (
+          (hasRole('kitchen') && onlyOrderStatusUpdated())
+          || (hasRole('waiter') && (onlyOrderStatusUpdated() || onlyOrderItemsAndTotalsUpdated()))
+          || isManagerOrAbove()
+        );
+      allow delete: if isManagerOrAbove() && isSameOrganization(docOrgId()) && orgIdUnchanged();
+    }
+
+    // -------------------------------------------------------------------------
+    // payments/{paymentId}
+    // Read, create: owner and manager only (same org). No update/delete (immutable).
+    // Prevent: changing organizationId; editing after creation.
+    // -------------------------------------------------------------------------
+    match /payments/{paymentId} {
+      allow read: if isManagerOrAbove() && isSameOrganization(docOrgId());
+      allow create: if isManagerOrAbove() && isSameOrganization(requestOrgId());
+      allow update, delete: if false;
+    }
+
+    // -------------------------------------------------------------------------
+    // deviceTokens/{tokenId}
+    // Document ID = FCM token. Read: owner/manager same org only.
+    // Create: authenticated user for own token only; userId/orgId/role must match profile.
+    // User doc must exist (exists check avoids .data on null when profile not yet created).
+    // Update: token owner only; organizationId and role immutable.
+    // -------------------------------------------------------------------------
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    match /deviceTokens/{tokenId} {
+      allow read: if isManagerOrAbove() && isSameOrganization(resource.data.organizationId);
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && userDoc() != null
+        && request.resource.data.organizationId == userDoc().data.organizationId
+        && request.resource.data.role == userDoc().data.role
+        && request.resource.data.keys().hasAll(['userId', 'organizationId', 'role', 'updatedAt']);
+      allow update: if isAuthenticated()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.organizationId == resource.data.organizationId
+        && request.resource.data.role == resource.data.role;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // -------------------------------------------------------------------------
+    // invites/{inviteId}
+    // Create: owner/manager, same org only, valid role (manager/waiter/kitchen).
+    // Read: unauthenticated (invite link by id) or same-org members (list).
+    // Update: only status -> 'accepted', and only by user whose email matches invite.
+    // Delete: owner/manager same org (revoke).
+    // -------------------------------------------------------------------------
+    function inviteValidRole() {
+      return request.resource.data.role == 'manager'
+        || request.resource.data.role == 'waiter'
+        || request.resource.data.role == 'kitchen';
+    }
+    function inviteRequiredFields() {
+      return request.resource.data.keys().hasAll([
+        'email', 'role', 'organizationId', 'invitedBy', 'status', 'createdAt', 'expiresAt'
+      ])
+      && request.resource.data.status == 'pending';
+    }
+    function inviteOrgMatchesUser() {
+      return request.resource.data.organizationId == getUserData().organizationId;
+    }
+    function inviteInvitedByIsCaller() {
+      return request.resource.data.invitedBy == request.auth.uid;
+    }
+    function inviteOnlyStatusToAccepted() {
+      let affected = request.resource.data.diff(resource.data).affectedKeys();
+      return affected.hasOnly(['status'])
+        && request.resource.data.status == 'accepted'
+        && resource.data.status == 'pending';
+    }
+    function inviteEmailMatchesAccepter() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.email == resource.data.email;
+    }
+
+    match /invites/{inviteId} {
+      allow read: if !isAuthenticated()
+        || isSameOrganization(resource.data.organizationId);
+      allow create: if isManagerOrAbove()
+        && inviteOrgMatchesUser()
+        && inviteInvitedByIsCaller()
+        && inviteValidRole()
+        && inviteRequiredFields();
+      allow update: if isAuthenticated()
+        && inviteOnlyStatusToAccepted()
+        && inviteEmailMatchesAccepter();
+      allow delete: if isManagerOrAbove() && isSameOrganization(resource.data.organizationId);
+    }
+  }
+}
