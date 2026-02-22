@@ -4,9 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { UserPlus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/providers/ToastProvider";
-import { PathGuard } from "@/components/guards/RoleGuard";
+import { RoleGuard } from "@/components/guards/RoleGuard";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
@@ -16,18 +17,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
-import { getInvitableRoles } from "@/lib/permissions";
-import { canInviteRole } from "@/lib/permissions";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { getInvitableRoles, canInviteRole } from "@/lib/permissions";
 import {
   createInvite,
   getInvitesByOrganization,
   isInviteValid,
 } from "@/services/invite.service";
-import type { Invite } from "@/types/invite";
-import type { InviteRole } from "@/types/invite";
+import type { Invite, InviteRole } from "@/types/invite";
 import { cn } from "@/lib/utils";
-
-const INVITE_PATH = "/dashboard/settings/invite";
 
 const inviteFormSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email"),
@@ -44,7 +42,46 @@ const ROLE_LABELS: Record<InviteRole, string> = {
   kitchen: "Kitchen",
 };
 
-function InvitePageContent() {
+function formatInviteDate(timestamp: { toMillis?: () => number } | undefined): string {
+  if (!timestamp?.toMillis) return "—";
+  return new Date(timestamp.toMillis()).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function InviteStatusBadge({ invite }: { invite: Invite }) {
+  const valid = invite.status === "pending" && isInviteValid(invite);
+  const label =
+    invite.status === "pending"
+      ? valid
+        ? "Pending"
+        : "Expired"
+      : invite.status === "accepted"
+        ? "Accepted"
+        : invite.status;
+
+  const variantClasses =
+    invite.status === "pending" && valid
+      ? "bg-emerald-200 text-emerald-900 dark:bg-emerald-700 dark:text-white"
+      : invite.status === "accepted"
+        ? "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-50"
+        : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200";
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+        variantClasses
+      )}
+    >
+      {label}
+    </span>
+  );
+}
+
+function InvitesPageContent() {
   const { user, firebaseUser, loading: authLoading } = useAuth();
   const toast = useToast();
   const [invites, setInvites] = useState<Invite[]>([]);
@@ -165,16 +202,29 @@ function InvitePageContent() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Invite staff</h1>
-        <p className="text-muted-foreground">
-          Send an invite link to add team members. They will join your
-          organization with the role you assign.
-        </p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">
+            Staff Invitations
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            Invite and manage your team members
+          </p>
+        </div>
+        <Button
+          leftIcon={<UserPlus className="h-4 w-4" />}
+          onClick={() =>
+            document.getElementById("invite-form-card")?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          Invite Staff
+        </Button>
       </div>
 
-      <Card>
+      {/* 1. Invite Form Section */}
+      <Card id="invite-form-card" className="rounded-xl">
         <CardHeader>
           <CardTitle>Send invite</CardTitle>
           <CardDescription>
@@ -185,7 +235,7 @@ function InvitePageContent() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
             <Input
-              label="Staff email"
+              label="Email"
               type="email"
               autoComplete="email"
               placeholder="colleague@example.com"
@@ -204,8 +254,7 @@ function InvitePageContent() {
                 aria-invalid={!!errors.role}
                 className={cn(
                   "flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2",
-                  errors.role &&
-                    "border-danger focus-visible:ring-danger"
+                  errors.role && "border-danger focus-visible:ring-danger"
                 )}
                 {...register("role", { required: true })}
               >
@@ -233,7 +282,8 @@ function InvitePageContent() {
         </form>
       </Card>
 
-      <Card>
+      {/* 2. Pending Invites List */}
+      <Card className="rounded-xl">
         <CardHeader>
           <CardTitle>Invites</CardTitle>
           <CardDescription>
@@ -243,63 +293,88 @@ function InvitePageContent() {
         </CardHeader>
         <CardContent>
           {invitesLoading ? (
-            <div className="flex min-h-[120px] items-center justify-center py-6">
+            <div className="flex min-h-[160px] items-center justify-center py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             </div>
           ) : invites.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              No invites yet. Create one above.
-            </p>
+            <EmptyState
+              icon={UserPlus}
+              title="No invitations yet"
+              description="Invite your staff to start managing orders and operations."
+            />
           ) : (
-            <ul className="divide-y divide-border">
-              {invites.map((invite) => {
-                const valid = invite.status === "pending" && isInviteValid(invite);
-                return (
-                  <li
-                    key={invite.id}
-                    className="flex flex-wrap items-center justify-between gap-2 py-3 first:pt-0"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {invite.email}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {ROLE_LABELS[invite.role]} ·{" "}
-                        <span
-                          className={cn(
-                            invite.status === "pending" && valid
-                              ? "text-green-600 dark:text-green-400"
-                              : invite.status === "accepted"
-                                ? "text-muted-foreground"
-                                : "text-amber-600 dark:text-amber-400"
-                          )}
-                        >
-                          {invite.status === "pending"
-                            ? valid
-                              ? "Pending"
-                              : "Expired"
-                            : invite.status === "accepted"
-                              ? "Accepted"
-                              : invite.status}
-                        </span>
-                      </p>
-                    </div>
-                    {valid && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        loading={copyingId === invite.id}
-                        disabled={copyingId !== null}
-                        onClick={() => copyLink(invite.id)}
+            <div className="overflow-x-auto rounded-lg border border-border">
+              <table className="w-full min-w-[520px] text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="px-4 py-3 text-left font-medium text-foreground">
+                      Email
+                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-foreground">
+                      Role
+                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-foreground">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-foreground">
+                      Invited
+                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-foreground">
+                      Expires
+                    </th>
+                    <th className="px-4 py-3 text-right font-medium text-foreground">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invites.map((invite) => {
+                    const valid =
+                      invite.status === "pending" && isInviteValid(invite);
+                    return (
+                      <tr
+                        key={invite.id}
+                        className="border-b border-border transition-colors hover:bg-muted/20 last:border-b-0"
                       >
-                        Copy link
-                      </Button>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+                        <td className="px-4 py-3 font-medium text-foreground">
+                          {invite.email}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {ROLE_LABELS[invite.role]}
+                        </td>
+                        <td className="px-4 py-3">
+                          <InviteStatusBadge invite={invite} />
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {formatInviteDate(invite.createdAt)}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {formatInviteDate(invite.expiresAt)}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {valid && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                loading={copyingId === invite.id}
+                                disabled={copyingId !== null}
+                                onClick={() => copyLink(invite.id)}
+                              >
+                                Copy link
+                              </Button>
+                            )}
+                            {/* Resend: future placeholder */}
+                            {/* Cancel invite: optional if implemented in service */}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -307,10 +382,10 @@ function InvitePageContent() {
   );
 }
 
-export default function InvitePage() {
+export default function InvitesPage() {
   return (
-    <PathGuard pathname={INVITE_PATH}>
-      <InvitePageContent />
-    </PathGuard>
+    <RoleGuard allowedRoles={["owner", "manager"]}>
+      <InvitesPageContent />
+    </RoleGuard>
   );
 }

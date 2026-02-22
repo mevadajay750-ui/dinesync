@@ -21,6 +21,7 @@ export const ROUTES = {
   DASHBOARD_ORDERS: "/dashboard/orders",
   DASHBOARD_KITCHEN: "/dashboard/kitchen",
   DASHBOARD_REPORTS: "/dashboard/reports",
+  DASHBOARD_INVITES: "/dashboard/invites",
   DASHBOARD_SETTINGS: "/dashboard/settings",
   UNAUTHORIZED: "/unauthorized",
 } as const;

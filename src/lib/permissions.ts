@@ -14,6 +14,7 @@ export const rolePermissions: Record<UserRole, readonly string[]> = {
     "/dashboard/orders",
     "/dashboard/kitchen",
     "/dashboard/reports",
+    "/dashboard/invites",
     "/dashboard/settings",
   ],
   manager: [
@@ -23,6 +24,7 @@ export const rolePermissions: Record<UserRole, readonly string[]> = {
     "/dashboard/orders",
     "/dashboard/kitchen",
     "/dashboard/reports",
+    "/dashboard/invites",
     "/dashboard/settings",
   ],
   waiter: [

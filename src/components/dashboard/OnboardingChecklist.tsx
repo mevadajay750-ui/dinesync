@@ -35,7 +35,7 @@ const CHECKLIST_ITEMS = [
     id: "staff",
     title: "Invite staff",
     completed: (state: OnboardingState) => state.usersCount > 1,
-    href: "/dashboard/settings/invite",
+    href: ROUTES.DASHBOARD_INVITES,
     goLabel: "Invite",
   },
   {

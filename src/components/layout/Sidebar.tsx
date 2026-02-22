@@ -15,6 +15,7 @@ import {
   ClipboardList,
   ChefHat,
   BarChart3,
+  UserPlus,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -28,6 +29,7 @@ const ALL_NAV_ITEMS = [
   { href: ROUTES.DASHBOARD_ORDERS, label: "Orders", icon: ClipboardList },
   { href: ROUTES.DASHBOARD_KITCHEN, label: "Kitchen", icon: ChefHat },
   { href: ROUTES.DASHBOARD_REPORTS, label: "Reports", icon: BarChart3 },
+  { href: ROUTES.DASHBOARD_INVITES, label: "Invites", icon: UserPlus },
   { href: ROUTES.DASHBOARD_SETTINGS, label: "Settings", icon: Settings },
 ] as const;
 
