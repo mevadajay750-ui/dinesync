@@ -2,6 +2,7 @@
 
 import { useReducedMotion } from "framer-motion";
 import { motion } from "framer-motion";
+import { AuthIllustration } from "./AuthIllustration";
 
 export function AuthBrandPanel() {
   const prefersReducedMotion = useReducedMotion();
@@ -61,6 +62,9 @@ export function AuthBrandPanel() {
             Manage orders, kitchen, billing, and reports in real-time.
           </p>
         </motion.div>
+        <div className="flex flex-1 items-center justify-center py-8">
+          <AuthIllustration />
+        </div>
         <motion.p
           className="text-xs text-white/50"
           initial={prefersReducedMotion ? undefined : { opacity: 0 }}
