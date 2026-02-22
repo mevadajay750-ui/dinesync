@@ -45,6 +45,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       disabled,
       type = "button",
+      onDrag,
+      onDragStart,
+      onDragEnd,
+      onDragOver,
+      onAnimationStart,
+      onAnimationEnd,
+      onAnimationIteration,
       ...props
     },
     ref

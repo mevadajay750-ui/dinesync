@@ -5,7 +5,20 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => {
+  (
+    {
+      className,
+      onDrag,
+      onDragStart,
+      onDragEnd,
+      onDragOver,
+      onAnimationStart,
+      onAnimationEnd,
+      onAnimationIteration,
+      ...props
+    },
+    ref
+  ) => {
     const prefersReducedMotion = useReducedMotion();
     return (
       <motion.div
