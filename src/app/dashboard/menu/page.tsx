@@ -164,7 +164,14 @@ function ItemCard({
           >
             {item.isVeg ? "Veg" : "Non-Veg"}
           </Badge>
-          <Badge variant={item.isAvailable ? "success" : "warning"}>
+          <Badge
+            variant={item.isAvailable ? "success" : "warning"}
+            className={
+              item.isAvailable
+                ? "bg-success! text-white! dark:bg-success! dark:text-white!"
+                : "bg-warning! text-white! dark:bg-warning! dark:text-white!"
+            }
+          >
             {item.isAvailable ? "In stock" : "Out of stock"}
           </Badge>
         </div>
@@ -186,10 +193,10 @@ function ItemCard({
                   type="button"
                   onClick={() => onToggleAvailability(item)}
                   className={cn(
-                    "shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all duration-200",
+                    "shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all duration-200 hover:opacity-90",
                     item.isAvailable
-                      ? "bg-muted text-muted-foreground hover:bg-warning/20 hover:text-warning"
-                      : "bg-muted text-muted-foreground hover:bg-success/20 hover:text-success"
+                      ? "bg-warning text-white dark:bg-warning dark:text-white"
+                      : "bg-success text-white dark:bg-success dark:text-white"
                   )}
                   aria-label={item.isAvailable ? "Mark out of stock" : "Mark in stock"}
                 >
