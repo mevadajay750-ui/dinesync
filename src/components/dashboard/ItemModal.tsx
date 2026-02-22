@@ -15,8 +15,8 @@ import { ImagePlus, X } from "lucide-react";
 const itemFormSchema = z.object({
   name: z.string().min(1, "Item name is required").max(120, "Name too long"),
   description: z.string().max(500, "Description too long").optional().or(z.literal("")),
-  price: z.coerce
-    .number()
+  price: z
+    .number({ message: "Price must be a number" })
     .positive("Price must be greater than 0")
     .finite("Invalid price"),
   categoryId: z.string().min(1, "Please select a category"),
@@ -219,7 +219,7 @@ export function ItemModal({
               min={0}
               placeholder="0.00"
               error={errors.price?.message}
-              {...register("price")}
+              {...register("price", { valueAsNumber: true })}
             />
             <div className="w-full">
               <label className="mb-1.5 block text-sm font-medium text-foreground">

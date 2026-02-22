@@ -32,7 +32,7 @@ const INVITE_PATH = "/dashboard/settings/invite";
 const inviteFormSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email"),
   role: z.enum(["manager", "waiter", "kitchen"], {
-    required_error: "Role is required",
+    message: "Role is required",
   }),
 });
 

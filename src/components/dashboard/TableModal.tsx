@@ -11,8 +11,8 @@ import type { Table } from "@/types/table";
 
 const tableFormSchema = z.object({
   name: z.string().min(1, "Table name is required").max(80, "Name too long"),
-  capacity: z.coerce
-    .number()
+  capacity: z
+    .number({ message: "Capacity must be a number" })
     .int("Must be a whole number")
     .min(1, "Capacity must be at least 1")
     .max(50, "Capacity cannot exceed 50"),
@@ -118,7 +118,7 @@ export function TableModal({
               max={50}
               placeholder="2"
               error={errors.capacity?.message}
-              {...register("capacity")}
+              {...register("capacity", { valueAsNumber: true })}
             />
             <Input
               label="Floor (optional)"

@@ -49,9 +49,6 @@ export async function createPaymentAndCompleteOrder(
   if (order.status !== "served") {
     throw new Error("Order must be served before payment");
   }
-  if (order.status === "completed" || order.status === "cancelled") {
-    throw new Error("Cannot pay a completed or cancelled order");
-  }
 
   const table = await getTableById(input.organizationId, input.tableId);
   if (!table) {

@@ -73,8 +73,8 @@ export function useMenuRealtime(
       categoriesQuery,
       (snapshot) => {
         const list = snapshot.docs.map((d) => ({
-          id: d.id,
           ...d.data(),
+          id: d.id,
         })) as MenuCategory[];
         setCategories(list);
         setLoading((prev) => (prev ? false : prev));
@@ -91,8 +91,8 @@ export function useMenuRealtime(
       itemsQuery,
       (snapshot) => {
         const list = snapshot.docs.map((d) => ({
-          id: d.id,
           ...d.data(),
+          id: d.id,
         })) as MenuItem[];
         setItems(list);
         setLoading((prev) => (prev ? false : prev));

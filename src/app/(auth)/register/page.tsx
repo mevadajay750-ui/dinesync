@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -45,7 +45,7 @@ const ROLE_LABELS: Record<Invite["role"], string> = {
   kitchen: "Kitchen",
 };
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteId = searchParams.get("inviteId");
@@ -267,5 +267,21 @@ export default function RegisterPage() {
         </CardFooter>
       </form>
     </Card>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <Card>
+          <CardContent className="flex min-h-[200px] items-center justify-center p-6">
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          </CardContent>
+        </Card>
+      }
+    >
+      <RegisterPageContent />
+    </Suspense>
   );
 }

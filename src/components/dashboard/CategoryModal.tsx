@@ -11,8 +11,8 @@ import type { MenuCategory } from "@/types/menu";
 
 const categoryFormSchema = z.object({
   name: z.string().min(1, "Category name is required").max(80, "Name too long"),
-  displayOrder: z.coerce
-    .number()
+  displayOrder: z
+    .number({ message: "Display order must be a number" })
     .int("Must be a whole number")
     .min(0, "Display order must be 0 or more"),
 });
@@ -112,7 +112,7 @@ export function CategoryModal({
               min={0}
               placeholder="0"
               error={errors.displayOrder?.message}
-              {...register("displayOrder")}
+              {...register("displayOrder", { valueAsNumber: true })}
             />
             <div className="flex gap-2 pt-2">
               <Button
