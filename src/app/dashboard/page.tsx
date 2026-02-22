@@ -403,7 +403,7 @@ export default function DashboardPage() {
                             </td>
                             <td className="px-4 py-3">
                               <Link
-                                href={`${ROUTES.DASHBOARD_ORDERS}/${order.id}`}
+                                href={`${ROUTES.DASHBOARD_ORDERS}/${order.id}/billing`}
                                 className="inline-flex text-muted-foreground transition-colors hover:text-foreground"
                                 aria-label={`Open order ${order.id}`}
                               >
