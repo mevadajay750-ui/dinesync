@@ -57,11 +57,11 @@ export function MobileDrawer({ open, onClose, collapsed, onToggleCollapse }: Mob
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="relative flex h-full flex-col bg-primary">
+        <div className="relative flex h-full flex-col bg-brand-primary">
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-2 top-2 z-10 rounded-xl p-2 text-primary-foreground/80 transition-all duration-200 hover:bg-white/10 hover:text-primary-foreground"
+            className="absolute right-2 top-2 z-10 rounded-xl p-2 text-white/80 transition-all duration-200 hover:bg-white/10 hover:text-white"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />

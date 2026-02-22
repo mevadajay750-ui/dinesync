@@ -307,7 +307,7 @@ function BillingPageInner() {
           <ArrowLeft className="h-4 w-4" />
           Back to orders
         </Link>
-        <h1 className="text-2xl font-bold text-foreground">Billing</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Billing</h1>
       </div>
 
       {error && (

@@ -1,17 +1,25 @@
+"use client";
+
 import { forwardRef, type HTMLAttributes } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn(
-        "rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:shadow-md",
-        className
-      )}
-      {...props}
-    />
-  )
+  ({ className, ...props }, ref) => {
+    const prefersReducedMotion = useReducedMotion();
+    return (
+      <motion.div
+        ref={ref}
+        className={cn(
+          "rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:shadow-md",
+          className
+        )}
+        whileHover={prefersReducedMotion ? undefined : { y: -4 }}
+        transition={{ duration: 0.2 }}
+        {...props}
+      />
+    );
+  }
 );
 Card.displayName = "Card";
 

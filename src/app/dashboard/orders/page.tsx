@@ -20,8 +20,9 @@ import { useOrdersRealtime } from "@/hooks/useOrdersRealtime";
 import type { Order, OrderItem, OrderStatus } from "@/types/order";
 import type { MenuCategory, MenuItem } from "@/types/menu";
 import type { Table } from "@/types/table";
-import { Plus, Minus, Trash2, ShoppingCart, CheckCircle, Receipt } from "lucide-react";
+import { Plus, Minus, Trash2, ShoppingCart, CheckCircle, Receipt, ClipboardList } from "lucide-react";
 import { Badge, ORDER_STATUS_VARIANT } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { cn, formatCurrency } from "@/lib/utils";
 
 const ORDERS_PATH = "/dashboard/orders";
@@ -236,7 +237,7 @@ function OrdersPageInner({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Orders</h2>
+        <h1 className="text-2xl font-semibold text-foreground">Orders</h1>
         <p className="text-muted-foreground">
           Create an order: select table, add items, then submit to kitchen.
         </p>
@@ -432,7 +433,7 @@ function OrdersPageInner({
       </div>
 
       {/* Active orders: Mark served (waiter) / Mark completed (billing, manager/owner) */}
-      {activeOrders.length > 0 && (
+      {activeOrders.length > 0 ? (
         <Card>
           <CardHeader className="flex flex-row items-center gap-2 pb-2">
             <Receipt className="h-5 w-5 text-muted-foreground" />
@@ -482,6 +483,16 @@ function OrdersPageInner({
                 </li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-6">
+            <EmptyState
+              icon={ClipboardList}
+              title="No active orders"
+              description="Orders will appear here when waiters create them."
+            />
           </CardContent>
         </Card>
       )}

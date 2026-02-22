@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/lib/constants";
 import { hasAccess } from "@/lib/hasAccess";
@@ -17,6 +18,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  Utensils,
 } from "lucide-react";
 
 const ALL_NAV_ITEMS = [
@@ -38,6 +40,7 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
+  const prefersReducedMotion = useReducedMotion();
 
   const navItems = useMemo(() => {
     if (!user) return [];
@@ -45,23 +48,32 @@ export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
   }, [user]);
 
   return (
-    <aside
+    <motion.aside
       className={cn(
-        "flex h-full min-h-screen shrink-0 flex-col border-r border-white/10 bg-primary transition-[width] duration-200",
-        collapsed ? "w-[72px]" : "w-72 min-w-[18rem]",
+        "flex h-full min-h-screen shrink-0 flex-col border-r border-white/10 bg-brand-primary overflow-hidden",
         className
       )}
+      animate={{ width: collapsed ? 72 : 240 }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.25 }}
     >
       <div className="flex h-14 items-center justify-between border-b border-white/10 px-3">
         {!collapsed && (
-          <Link href={ROUTES.DASHBOARD} className="font-semibold text-primary-foreground transition-colors duration-200 hover:opacity-90">
-            DineSync
+          <Link
+            href={ROUTES.DASHBOARD}
+            className="flex items-center gap-2 font-bold text-white transition-colors duration-200 hover:opacity-90"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+              <Utensils className="h-4 w-4" aria-hidden />
+            </span>
+            <span>
+              Dine<span className="text-brand-accent">Sync</span>
+            </span>
           </Link>
         )}
         <button
           type="button"
           onClick={onToggle}
-          className="rounded-xl p-2 text-primary-foreground/80 transition-all duration-200 hover:bg-white/10 hover:text-primary-foreground"
+          className="rounded-xl p-2 text-white/80 transition-all duration-200 hover:bg-white/10 hover:text-white"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
@@ -82,8 +94,8 @@ export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-white/15 text-primary-foreground"
-                  : "text-primary-foreground/80 hover:bg-white/10 hover:text-primary-foreground"
+                  ? "bg-white/15 text-white"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               )}
             >
               <Icon className="h-5 w-5 shrink-0" />
@@ -92,6 +104,6 @@ export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
           );
         })}
       </nav>
-    </aside>
+    </motion.aside>
   );
 }

@@ -13,17 +13,17 @@ export type BadgeVariant =
 
 const variantStyles: Record<BadgeVariant, string> = {
   success:
-    "bg-success/15 text-success dark:bg-success/20 dark:text-success",
+    "bg-success/10 text-success dark:bg-success/10 dark:text-success",
   warning:
-    "bg-warning/15 text-warning dark:bg-warning/20 dark:text-warning",
+    "bg-warning/10 text-warning dark:bg-warning/10 dark:text-warning",
   danger:
-    "bg-danger/15 text-danger dark:bg-danger/20 dark:text-danger",
+    "bg-danger/10 text-danger dark:bg-danger/10 dark:text-danger",
   info:
-    "bg-info/15 text-info dark:bg-info/20 dark:text-info",
+    "bg-info/10 text-info dark:bg-info/10 dark:text-info",
   secondary:
-    "bg-secondary/15 text-secondary dark:bg-secondary/20 dark:text-secondary",
+    "bg-secondary/10 text-secondary-foreground dark:bg-secondary/10 dark:text-secondary-foreground",
   muted:
-    "bg-muted/20 text-muted-foreground dark:bg-muted/30",
+    "bg-muted/10 text-muted-foreground dark:bg-muted/10 dark:text-muted-foreground",
 };
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {

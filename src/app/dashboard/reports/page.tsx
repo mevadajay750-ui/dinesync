@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { RoleGuard } from "@/components/guards/RoleGuard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
@@ -17,7 +18,20 @@ import {
   startOfToday,
 } from "date-fns";
 import { IndianRupee, ShoppingBag, TrendingUp, BarChart3, Loader2 } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { cn, formatCurrency } from "@/lib/utils";
+
+const metricsGridVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.05 },
+  },
+};
+
+const metricCardVariants = {
+  hidden: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0 },
+};
 
 const PRESETS = [
   { id: "today", label: "Today", getRange: () => ({ start: startOfToday(), end: endOfDay(new Date()) }) },
@@ -27,6 +41,7 @@ const PRESETS = [
 
 function ReportsContent() {
   const { organization, loading: orgLoading } = useOrganization();
+  const prefersReducedMotion = useReducedMotion();
   const [preset, setPreset] = useState<"today" | "7d" | "30d">("7d");
   const [startDate, setStartDate] = useState<Date>(() => startOfDay(subDays(new Date(), 6)));
   const [endDate, setEndDate] = useState<Date>(() => endOfDay(new Date()));
@@ -35,6 +50,29 @@ function ReportsContent() {
   const [bestSellers, setBestSellers] = useState<BestSellingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [displayRevenue, setDisplayRevenue] = useState(0);
+  useEffect(() => {
+    if (!metrics?.totalRevenue) {
+      setDisplayRevenue(0);
+      return;
+    }
+    const target = metrics.totalRevenue;
+    const duration = 400;
+    const steps = 12;
+    const step = target / steps;
+    const interval = duration / steps;
+    let current = 0;
+    const id = setInterval(() => {
+      current += step;
+      if (current >= target) {
+        setDisplayRevenue(target);
+        clearInterval(id);
+        return;
+      }
+      setDisplayRevenue(current);
+    }, interval);
+    return () => clearInterval(id);
+  }, [metrics?.totalRevenue]);
 
   const applyPreset = useCallback((id: "today" | "7d" | "30d") => {
     const p = PRESETS.find((x) => x.id === id);
@@ -86,7 +124,7 @@ function ReportsContent() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Reports</h2>
+          <h1 className="text-2xl font-semibold text-foreground">Reports</h1>
           <p className="text-muted-foreground">Revenue, orders, and best sellers by date range.</p>
         </div>
       </div>
@@ -147,91 +185,114 @@ function ReportsContent() {
         </div>
       )}
 
+      {!loading && (!metrics || metrics.totalOrders === 0) && (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-6">
+            <EmptyState
+              icon={BarChart3}
+              title="No data available"
+              description="Try adjusting your date range."
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Metrics cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <Card className="transition-all duration-200 hover:shadow-md">
-          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Revenue
-            </CardTitle>
-            <IndianRupee className="h-5 w-5 shrink-0 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Loading…</span>
-              </div>
-            ) : metrics ? (
-              <>
-                <p className="text-3xl font-semibold text-foreground tracking-tight">
-                  {formatCurrency(metrics.totalRevenue)}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">{dateLabel}</p>
-              </>
-            ) : (
-              <>
-                <p className="text-3xl font-semibold text-foreground">—</p>
-                <p className="mt-1 text-xs text-muted-foreground">No data</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-        <Card className="transition-all duration-200 hover:shadow-md">
-          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Orders
-            </CardTitle>
-            <ShoppingBag className="h-5 w-5 shrink-0 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Loading…</span>
-              </div>
-            ) : metrics ? (
-              <>
-                <p className="text-3xl font-semibold text-foreground tracking-tight">{metrics.totalOrders}</p>
-                <p className="mt-1 text-xs text-muted-foreground">Paid in period</p>
-              </>
-            ) : (
-              <>
-                <p className="text-3xl font-semibold text-foreground">—</p>
-                <p className="mt-1 text-xs text-muted-foreground">No data</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-        <Card className="transition-all duration-200 hover:shadow-md">
-          <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Average Order Value
-            </CardTitle>
-            <TrendingUp className="h-5 w-5 shrink-0 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Loading…</span>
-              </div>
-            ) : metrics ? (
-              <>
-                <p className="text-3xl font-semibold text-foreground tracking-tight">
-                  {formatCurrency(metrics.averageOrderValue)}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">Per order</p>
-              </>
-            ) : (
-              <>
-                <p className="text-3xl font-semibold text-foreground">—</p>
-                <p className="mt-1 text-xs text-muted-foreground">No data</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <motion.div
+        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        variants={prefersReducedMotion ? undefined : metricsGridVariants}
+        initial="hidden"
+        animate={loading ? "hidden" : "visible"}
+      >
+        <motion.div variants={prefersReducedMotion ? undefined : metricCardVariants} transition={{ duration: 0.2 }}>
+          <Card className="transition-all duration-200 hover:shadow-md">
+            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Revenue
+              </CardTitle>
+              <IndianRupee className="h-5 w-5 shrink-0 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Loading…</span>
+                </div>
+              ) : metrics ? (
+                <>
+                  <p className="text-3xl font-semibold text-foreground tracking-tight">
+                    {formatCurrency(displayRevenue)}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{dateLabel}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-3xl font-semibold text-foreground">—</p>
+                  <p className="mt-1 text-xs text-muted-foreground">No data</p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div variants={prefersReducedMotion ? undefined : metricCardVariants} transition={{ duration: 0.2 }}>
+          <Card className="transition-all duration-200 hover:shadow-md">
+            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Total Orders
+              </CardTitle>
+              <ShoppingBag className="h-5 w-5 shrink-0 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Loading…</span>
+                </div>
+              ) : metrics ? (
+                <>
+                  <p className="text-3xl font-semibold text-foreground tracking-tight">{metrics.totalOrders}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Paid in period</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-3xl font-semibold text-foreground">—</p>
+                  <p className="mt-1 text-xs text-muted-foreground">No data</p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div variants={prefersReducedMotion ? undefined : metricCardVariants} transition={{ duration: 0.2 }}>
+          <Card className="transition-all duration-200 hover:shadow-md">
+            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Average Order Value
+              </CardTitle>
+              <TrendingUp className="h-5 w-5 shrink-0 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Loading…</span>
+                </div>
+              ) : metrics ? (
+                <>
+                  <p className="text-3xl font-semibold text-foreground tracking-tight">
+                    {formatCurrency(metrics.averageOrderValue)}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">Per order</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-3xl font-semibold text-foreground">—</p>
+                  <p className="mt-1 text-xs text-muted-foreground">No data</p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
 
       {/* Revenue chart */}
       <Card>

@@ -7,7 +7,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Settings</h2>
+        <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
         <p className="text-muted-foreground">Organization and account settings.</p>
       </div>
       <Card>

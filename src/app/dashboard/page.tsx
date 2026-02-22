@@ -1,24 +1,56 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/hooks/useOrganization";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import {
+  OnboardingChecklist,
+  getOnboardingDismissed,
+  setOnboardingDismissed,
+  getOnboardingComplete,
+  setOnboardingComplete,
+} from "@/components/dashboard/OnboardingChecklist";
 import { ROUTES } from "@/lib/constants";
 import { LayoutDashboard, ClipboardList, UtensilsCrossed, TrendingUp } from "lucide-react";
 import Link from "next/link";
+
+const SHOW_CHECKLIST_ROLES = ["owner", "manager"] as const;
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const { organization, loading: orgLoading } = useOrganization();
+  const [dismissed, setDismissed] = useState(false);
+  const [complete, setComplete] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.replace(ROUTES.LOGIN);
     }
   }, [loading, user, router]);
+
+  useEffect(() => {
+    setDismissed(getOnboardingDismissed());
+    setComplete(getOnboardingComplete());
+  }, []);
+
+  const showChecklist =
+    user?.organizationId &&
+    (SHOW_CHECKLIST_ROLES as readonly string[]).includes(user.role) &&
+    !dismissed &&
+    !complete;
+
+  const handleDismissChecklist = () => {
+    setOnboardingDismissed(true);
+    setDismissed(true);
+  };
+
+  const handleOnboardingComplete = () => {
+    setOnboardingComplete(true);
+    setComplete(true);
+  };
 
   if (loading || !user) {
     return (
@@ -31,11 +63,19 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Welcome back, {user.name}</h2>
+        <h1 className="text-2xl font-semibold text-foreground">Welcome back, {user.name}</h1>
         <p className="text-muted-foreground">
           {orgLoading ? "Loading..." : organization ? organization.name : "Your organization"}
         </p>
       </div>
+
+      {showChecklist && organization?.id && (
+        <OnboardingChecklist
+          organizationId={organization.id}
+          onDismiss={handleDismissChecklist}
+          onComplete={handleOnboardingComplete}
+        />
+      )}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Link href={ROUTES.DASHBOARD_ORDERS} className="transition-all duration-200 hover:scale-[1.02]">

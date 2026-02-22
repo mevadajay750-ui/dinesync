@@ -167,7 +167,7 @@ function InvitePageContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Invite staff</h2>
+        <h1 className="text-2xl font-semibold text-foreground">Invite staff</h1>
         <p className="text-muted-foreground">
           Send an invite link to add team members. They will join your
           organization with the role you assign.

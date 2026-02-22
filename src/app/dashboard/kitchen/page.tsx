@@ -11,6 +11,7 @@ import { updateOrderStatus } from "@/services/order.service";
 import type { Order, OrderStatus } from "@/types/order";
 import { ChefHat, Clock, CheckCircle } from "lucide-react";
 import { Badge, ORDER_STATUS_VARIANT } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { cn, formatCurrency } from "@/lib/utils";
 
 const KITCHEN_PATH = "/dashboard/kitchen";
@@ -192,7 +193,7 @@ function KitchenPageInner() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Kitchen</h2>
+        <h1 className="text-2xl font-semibold text-foreground">Kitchen</h1>
         <p className="text-muted-foreground">
           Real-time orders. Update status as you prepare and complete orders.
         </p>
@@ -224,9 +225,18 @@ function KitchenPageInner() {
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filteredOrders.length === 0 ? (
-          <p className="col-span-full text-center text-muted-foreground py-8">
-            No {tab === "all" ? "active" : tab} orders.
-          </p>
+          <div className="col-span-full">
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-6">
+                <EmptyState
+                  icon={ChefHat}
+                  title="Kitchen is all caught up"
+                  description="No pending orders at the moment."
+                  accent="success"
+                />
+              </CardContent>
+            </Card>
+          </div>
         ) : (
           filteredOrders.map((order) => (
             <OrderCard

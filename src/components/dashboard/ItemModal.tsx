@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -11,6 +12,9 @@ import { uploadMenuItemImage } from "@/lib/firebase/storage";
 import type { MenuCategory, MenuItem } from "@/types/menu";
 import { cn } from "@/lib/utils";
 import { ImagePlus, X } from "lucide-react";
+
+const modalBackdrop = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.15 } };
+const modalContent = { initial: { opacity: 0, scale: 0.95 }, animate: { opacity: 1, scale: 1 }, exit: { opacity: 0, scale: 0.95 }, transition: { duration: 0.15 } };
 
 const itemFormSchema = z.object({
   name: z.string().min(1, "Item name is required").max(120, "Name too long"),
@@ -136,8 +140,6 @@ export function ItemModal({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  if (!open) return null;
-
   const handleFormSubmit = async (values: ItemFormValues) => {
     let imageUrl: string | undefined | "" = undefined;
     if (imageFile && organizationId) {
@@ -163,18 +165,25 @@ export function ItemModal({
   const loading = isSubmitting || imageUploading;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="item-modal-title"
-    >
-      <div
-        className="absolute inset-0 bg-black/50 transition-opacity"
-        onClick={onClose}
-        aria-hidden
-      />
-      <Card className="relative z-10 w-full max-w-lg shadow-lg my-8">
+    <AnimatePresence>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="item-modal-title"
+        >
+          <motion.div
+            className="absolute inset-0 bg-black/50"
+            onClick={onClose}
+            aria-hidden
+            {...modalBackdrop}
+          />
+          <motion.div
+            className="relative z-10 w-full max-w-lg my-8"
+            {...modalContent}
+          >
+            <Card className="w-full shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle id="item-modal-title">
             {mode === "create" ? "Add menu item" : "Edit menu item"}
@@ -365,6 +374,9 @@ export function ItemModal({
           </form>
         </CardContent>
       </Card>
-    </div>
+            </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

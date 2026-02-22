@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/providers/ToastProvider";
 import { PathGuard } from "@/components/guards/RoleGuard";
@@ -21,9 +22,13 @@ import {
   toggleAvailability,
 } from "@/services/menu.service";
 import type { MenuCategory, MenuItem } from "@/types/menu";
-import { Plus, Pencil, Trash2, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, ImageIcon, UtensilsCrossed } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { cn, formatCurrency } from "@/lib/utils";
+
+const gridStagger = { hidden: {}, visible: { transition: { staggerChildren: 0.03 } } };
+const cardStagger = { hidden: { opacity: 0, y: 6 }, visible: { opacity: 1, y: 0 } };
 
 const MENU_PATH = "/dashboard/menu";
 
@@ -134,7 +139,7 @@ function ItemCard({
   onToggleAvailability: (item: MenuItem) => void;
 }) {
   return (
-    <Card className="overflow-hidden transition-all duration-200 hover:scale-[1.02]">
+    <Card className="overflow-hidden">
       <div className="aspect-4/3 relative bg-muted">
         {item.imageUrl ? (
           <Image
@@ -227,6 +232,7 @@ function ItemCard({
 function MenuPageContent() {
   const { user } = useAuth();
   const toast = useToast();
+  const prefersReducedMotion = useReducedMotion();
   const organizationId = user?.organizationId ?? null;
   const canManage = user ? canManageMenu(user.role) : false;
 
@@ -394,7 +400,7 @@ function MenuPageContent() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Menu</h2>
+          <h1 className="text-2xl font-semibold text-foreground">Menu</h1>
           <p className="text-muted-foreground">
             Manage categories and menu items. Updates in real time.
           </p>
@@ -427,11 +433,11 @@ function MenuPageContent() {
         />
         <main className="flex-1 min-w-0 p-4 md:p-6">
           {loading ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 pt-4 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <Card key={i} className="overflow-hidden">
                   <div className="aspect-4/3 animate-pulse bg-muted/50" />
-                  <CardContent className="p-5">
+                  <CardContent className="p-5 pt-6">
                     <div className="h-5 w-32 animate-pulse rounded-lg bg-muted/50" />
                     <div className="mt-2 h-4 w-24 animate-pulse rounded-lg bg-muted/50" />
                     <div className="mt-3 h-5 w-16 animate-pulse rounded-lg bg-muted/50" />
@@ -441,53 +447,49 @@ function MenuPageContent() {
             </div>
           ) : categories.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-muted-foreground">
-                  No categories yet. Add a category, then add menu items.
-                </p>
-                {canManage && (
-                  <Button
-                    className="mt-4"
-                    leftIcon={<Plus className="h-4 w-4" />}
-                    onClick={openAddCategory}
-                  >
-                    Add category
-                  </Button>
-                )}
+              <CardContent className="flex flex-col items-center justify-center py-6">
+                <EmptyState
+                  icon={UtensilsCrossed}
+                  title="No categories yet"
+                  description="Add a category, then add menu items."
+                  actionLabel={canManage ? "Add category" : undefined}
+                  onAction={canManage ? openAddCategory : undefined}
+                  actionIcon={Plus}
+                />
               </CardContent>
             </Card>
           ) : filteredItems.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-muted-foreground">
-                  {selectedCategoryId
-                    ? "No items in this category."
-                    : "No menu items yet."}
-                </p>
-                {canManage && (
-                  <Button
-                    className="mt-4"
-                    leftIcon={<Plus className="h-4 w-4" />}
-                    onClick={openAddItem}
-                  >
-                    Add item
-                  </Button>
-                )}
+              <CardContent className="flex flex-col items-center justify-center py-6">
+                <EmptyState
+                  icon={UtensilsCrossed}
+                  title="Your menu is empty"
+                  description="Add categories and items to start taking orders."
+                  actionLabel={canManage ? "Add menu item" : undefined}
+                  onAction={canManage ? openAddItem : undefined}
+                  actionIcon={Plus}
+                />
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <motion.div
+              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+              variants={prefersReducedMotion ? undefined : gridStagger}
+              initial="hidden"
+              animate="visible"
+            >
               {filteredItems.map((item) => (
-                <ItemCard
-                  key={item.id}
-                  item={item}
-                  canManage={canManage}
-                  onEdit={openEditItem}
-                  onDelete={setDeleteItemTarget}
-                  onToggleAvailability={handleToggleAvailability}
-                />
+                <motion.div key={item.id} variants={prefersReducedMotion ? undefined : cardStagger} transition={{ duration: 0.2 }}>
+                  <ItemCard
+                    item={item}
+                    canManage={canManage}
+                    onEdit={openEditItem}
+                    onDelete={setDeleteItemTarget}
+                    onToggleAvailability={handleToggleAvailability}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </main>
       </div>

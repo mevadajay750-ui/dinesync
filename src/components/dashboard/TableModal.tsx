@@ -4,10 +4,14 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { Table } from "@/types/table";
+
+const modalBackdrop = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.15 } };
+const modalContent = { initial: { opacity: 0, scale: 0.95 }, animate: { opacity: 1, scale: 1 }, exit: { opacity: 0, scale: 0.95 }, transition: { duration: 0.15 } };
 
 const tableFormSchema = z.object({
   name: z.string().min(1, "Table name is required").max(80, "Name too long"),
@@ -63,8 +67,6 @@ export function TableModal({
     }
   }, [open, mode, table, setValue, reset]);
 
-  if (!open) return null;
-
   const handleFormSubmit = async (values: TableFormValues) => {
     await onSubmit({
       name: values.name,
@@ -75,18 +77,22 @@ export function TableModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="table-modal-title"
-    >
-      <div
-        className="absolute inset-0 bg-black/50 transition-opacity"
-        onClick={onClose}
-        aria-hidden
-      />
-      <Card className="relative z-10 w-full max-w-md shadow-lg">
+    <AnimatePresence>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="table-modal-title"
+        >
+          <motion.div
+            className="absolute inset-0 bg-black/50"
+            onClick={onClose}
+            aria-hidden
+            {...modalBackdrop}
+          />
+          <motion.div className="relative z-10 w-full max-w-md" {...modalContent}>
+            <Card className="w-full shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle id="table-modal-title">
             {mode === "create" ? "Add table" : "Edit table"}
@@ -142,6 +148,9 @@ export function TableModal({
           </form>
         </CardContent>
       </Card>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
